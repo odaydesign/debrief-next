@@ -42,6 +42,8 @@ export default defineSchema({
         articleId: v.id("articles"),
         text: v.string(),
         createdAt: v.string(),
+        highlightText: v.optional(v.string()),
+        color: v.optional(v.string()),
     }).index("by_article", ["articleId"]),
 
     searchBundles: defineTable({

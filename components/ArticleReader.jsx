@@ -2,9 +2,45 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Bookmark, Share2, Clock, ArrowRight } from 'lucide-react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+
+const COLORS = [
+  { id: 'yellow', name: 'Gul', hex: '#FEF08A', class: 'highlight-yellow' },
+  { id: 'green', name: 'Grön', hex: '#A7F3D0', class: 'highlight-green' },
+  { id: 'blue', name: 'Blå', hex: '#BFDBFE', class: 'highlight-blue' },
+  { id: 'purple', name: 'Lila', hex: '#E9D5FF', class: 'highlight-purple' },
+];
+
+const getHighlightedHTML = (content, notesList) => {
+    if (!content || !notesList || notesList.length === 0) return content;
+    
+    let highlightedHTML = content;
+    const highlightNotes = [...notesList]
+        .filter(n => n.highlightText && n.highlightText.trim())
+        .sort((a, b) => b.highlightText.length - a.highlightText.length);
+
+    highlightNotes.forEach(note => {
+        const textToHighlight = note.highlightText;
+        const color = note.color || 'yellow';
+        const escapedText = textToHighlight.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        
+        const parts = highlightedHTML.split(/(<[^>]+>)/g);
+        const regex = new RegExp(escapedText, 'g');
+        
+        const updatedParts = parts.map(part => {
+            if (part.startsWith('<')) {
+                return part;
+            }
+            return part.replace(regex, `<span class="highlight-node highlight-${color}" data-note-id="${note._id}">$&</span>`);
+        });
+        
+        highlightedHTML = updatedParts.join('');
+    });
+    
+    return highlightedHTML;
+};
 
 const ArticleReader = ({ article, onClose, onBookmark }) => {
     const containerRef = useRef(null);
@@ -16,6 +52,16 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
     const pullY = useSpring(0, { stiffness: 400, damping: 30 });
     const imageY = useTransform(scrollY, [0, 500], [0, 250]);
 
+    // Highlighting & selection states
+    const [selectedText, setSelectedText] = useState('');
+    const [selectionCoords, setSelectionCoords] = useState(null);
+    const [selectedColor, setSelectedColor] = useState('yellow');
+    const [selectionNote, setSelectionNote] = useState('');
+
+    // Tooltip states for active highlights
+    const [tooltipNote, setTooltipNote] = useState(null);
+    const [tooltipCoords, setTooltipCoords] = useState(null);
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = ''; };
@@ -25,6 +71,11 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         const atBottom = scrollHeight - scrollTop <= clientHeight + 5;
         setIsAtBottom(atBottom);
+
+        if (tooltipNote) {
+            setTooltipNote(null);
+            setTooltipCoords(null);
+        }
     };
 
     // Notes state
@@ -36,6 +87,7 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
     const savedNotes = rawNotes || [];
 
     const addNoteMutation = useMutation(api.notes.add);
+    const deleteNoteMutation = useMutation(api.notes.remove);
 
     const handleSaveNote = async () => {
         if (!noteText.trim()) return;
@@ -47,6 +99,76 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
             console.error("Failed to add note", err);
         }
         setIsSavingNote(false);
+    };
+
+    const handleTextSelection = () => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed) {
+            setSelectedText('');
+            setSelectionCoords(null);
+            return;
+        }
+
+        const selectedStr = selection.toString().trim();
+        if (!selectedStr) {
+            setSelectedText('');
+            setSelectionCoords(null);
+            return;
+        }
+
+        try {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            
+            setSelectedText(selectedStr);
+            setSelectionCoords({
+                top: rect.top - 70,
+                left: rect.left + rect.width / 2,
+            });
+        } catch (err) {
+            console.error("Error reading selection range", err);
+        }
+    };
+
+    const clearSelection = () => {
+        setSelectedText('');
+        setSelectionCoords(null);
+        window.getSelection()?.removeAllRanges();
+    };
+
+    const handleCreateHighlight = async () => {
+        if (!selectedText) return;
+        try {
+            await addNoteMutation({
+                articleId: article.id,
+                text: selectionNote.trim() || 'Highlight',
+                highlightText: selectedText,
+                color: selectedColor,
+            });
+            clearSelection();
+            setSelectionNote('');
+        } catch (err) {
+            console.error("Failed to save highlight:", err);
+        }
+    };
+
+    const handleBodyClick = (e) => {
+        const highlightSpan = e.target.closest('.highlight-node');
+        if (highlightSpan) {
+            const noteId = highlightSpan.getAttribute('data-note-id');
+            const clickedNote = savedNotes.find(n => n._id === noteId);
+            if (clickedNote) {
+                const rect = highlightSpan.getBoundingClientRect();
+                setTooltipNote(clickedNote);
+                setTooltipCoords({
+                    top: rect.bottom + 8,
+                    left: rect.left + rect.width / 2,
+                });
+            }
+        } else {
+            setTooltipNote(null);
+            setTooltipCoords(null);
+        }
     };
 
     // --- Touch Logic (Mobile Only) ---
@@ -177,8 +299,11 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                         </motion.p>
 
                         <div
-                            className="prose prose-lg text-gray-600 font-serif leading-loose mb-12"
-                            dangerouslySetInnerHTML={{ __html: article.content }}
+                            className="prose prose-lg text-gray-600 font-serif leading-loose mb-12 select-text"
+                            onMouseUp={handleTextSelection}
+                            onTouchEnd={handleTextSelection}
+                            onClick={handleBodyClick}
+                            dangerouslySetInnerHTML={{ __html: getHighlightedHTML(article.content, savedNotes) }}
                         />
 
                         {/* Quick Notes Section */}
@@ -208,7 +333,16 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                                 <div className="mt-8 space-y-4">
                                     <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider font-sans border-b border-stone-200 pb-2">Previous Notes</h4>
                                     {savedNotes.map(n => (
-                                        <div key={n._id} className="bg-white border border-stone-100 p-4 rounded-xl">
+                                        <div key={n._id} className="bg-white border border-stone-100 p-4 rounded-xl flex flex-col gap-2">
+                                            {n.highlightText && (
+                                                <p className={`text-[11px] pl-2 border-l-2 font-serif italic text-gray-600 ${
+                                                    n.color === 'green' ? 'border-emerald-400' :
+                                                    n.color === 'blue' ? 'border-blue-400' :
+                                                    n.color === 'purple' ? 'border-purple-400' : 'border-yellow-400'
+                                                }`}>
+                                                    "{n.highlightText}"
+                                                </p>
+                                            )}
                                             <p className="text-gray-700 font-sans text-sm">{n.text}</p>
                                         </div>
                                     ))}
@@ -225,6 +359,153 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                     </div>
                 </motion.div>
             </div>
+
+            {/* CSS Highlights Styles */}
+            <style>{`
+                .highlight-node {
+                    border-radius: 0.25rem;
+                    cursor: pointer;
+                    padding: 0 0.15rem;
+                    transition: all 0.2s ease;
+                }
+                .highlight-yellow {
+                    background-color: rgba(254, 240, 138, 0.45);
+                    border-bottom: 2.5px solid rgba(234, 179, 8, 0.8);
+                    color: #1c1917;
+                }
+                .highlight-yellow:hover {
+                    background-color: rgba(254, 240, 138, 0.8);
+                }
+                .highlight-green {
+                    background-color: rgba(167, 243, 208, 0.45);
+                    border-bottom: 2.5px solid rgba(16, 185, 129, 0.8);
+                    color: #064e3b;
+                }
+                .highlight-green:hover {
+                    background-color: rgba(167, 243, 208, 0.8);
+                }
+                .highlight-blue {
+                    background-color: rgba(191, 219, 254, 0.45);
+                    border-bottom: 2.5px solid rgba(59, 130, 246, 0.8);
+                    color: #1e3a8a;
+                }
+                .highlight-blue:hover {
+                    background-color: rgba(191, 219, 254, 0.8);
+                }
+                .highlight-purple {
+                    background-color: rgba(233, 213, 255, 0.45);
+                    border-bottom: 2.5px solid rgba(168, 85, 247, 0.8);
+                    color: #581c87;
+                }
+                .highlight-purple:hover {
+                    background-color: rgba(233, 213, 255, 0.8);
+                }
+            `}</style>
+
+            {/* Selection Popover UI */}
+            <AnimatePresence>
+                {selectedText && selectionCoords && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                        className="fixed z-50 bg-[#1a1818] border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col gap-3 pointer-events-auto"
+                        style={{
+                            top: `${Math.max(10, selectionCoords.top)}px`,
+                            left: `${selectionCoords.left}px`,
+                            transform: 'translateX(-50%)',
+                            width: '280px',
+                        }}
+                    >
+                        <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Välj färg</span>
+                            <div className="flex gap-2">
+                                {COLORS.map(color => (
+                                    <button
+                                        key={color.id}
+                                        onClick={() => setSelectedColor(color.id)}
+                                        className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${
+                                            selectedColor === color.id ? 'border-white scale-105' : 'border-transparent'
+                                        }`}
+                                        style={{ backgroundColor: color.hex }}
+                                        title={color.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Lägg till anteckning (valfritt)</span>
+                            <textarea
+                                value={selectionNote}
+                                onChange={(e) => setSelectionNote(e.target.value)}
+                                placeholder="Skriv dina tankar..."
+                                className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-xs text-white placeholder-white/20 focus:outline-none focus:border-green-400 resize-none h-14"
+                            />
+                        </div>
+
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                onClick={clearSelection}
+                                className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white/50 hover:text-white transition-colors"
+                            >
+                                Avbryt
+                            </button>
+                            <button
+                                onClick={handleCreateHighlight}
+                                className="bg-[#50c878] text-[#1a1818] px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-[#43a865] transition-colors"
+                            >
+                                Spara
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Highlight Tooltip UI */}
+            <AnimatePresence>
+                {tooltipNote && tooltipCoords && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                        className="fixed z-50 bg-[#1a1818] border border-white/10 rounded-xl shadow-2xl p-3 text-xs text-white max-w-[240px] pointer-events-auto"
+                        style={{
+                            top: `${tooltipCoords.top}px`,
+                            left: `${tooltipCoords.left}px`,
+                            transform: 'translateX(-50%)',
+                        }}
+                    >
+                        <div className="flex flex-col gap-2">
+                            {tooltipNote.text && tooltipNote.text !== 'Highlight' && (
+                                <p className="font-sans leading-relaxed text-white/90">
+                                    {tooltipNote.text}
+                                </p>
+                            )}
+                            <div className="flex justify-between items-center gap-4 mt-1 border-t border-white/10 pt-2">
+                                <span className="text-[9px] text-white/40 uppercase font-sans">
+                                    {new Date(tooltipNote.createdAt).toLocaleDateString('sv-SE')}
+                                </span>
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        try {
+                                            await deleteNoteMutation({ id: tooltipNote._id });
+                                            setTooltipNote(null);
+                                            setTooltipCoords(null);
+                                        } catch (err) {
+                                            console.error("Kunde inte radera anteckning:", err);
+                                        }
+                                    }}
+                                    className="text-red-400 hover:text-red-300 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1 hover:scale-105 transition-all"
+                                >
+                                    Radera
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

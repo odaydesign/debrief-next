@@ -1,13 +1,14 @@
 "use client";
 
 import React from 'react';
-import { FileText, ChevronRight } from 'lucide-react';
+import { FileText, ChevronRight, Trash2, Highlighter } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 const NotesView = ({ notes, articles, setActiveArticle }) => {
-    // Group notes by article if desired, or show sequentially
-    // Since mock notes have { id, articleId, text, createdAt }, we'll map them 
-    // and find the corresponding article to display alongside.
+    const deleteNoteMutation = useMutation(api.notes.remove);
+
     return (
         <div className="pb-32 px-6 pt-12 min-h-screen bg-stone-900 border-x border-stone-800 animate-in fade-in duration-500">
             <header className="mb-8 flex justify-between items-end">
@@ -34,26 +35,61 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 key={note.id}
-                                className="bg-stone-800/60 border border-stone-700 rounded-2xl p-5 mb-4"
+                                className="bg-stone-800/60 border border-stone-700 rounded-2xl p-5 mb-4 relative group"
                             >
-                                <div
-                                    className="flex items-center gap-3 mb-4 pb-4 border-b border-stone-700/50 cursor-pointer group"
-                                    onClick={() => setActiveArticle(article)}
-                                >
-                                    <img src={article.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                                    <div className="flex-1 overflow-hidden">
-                                        <h3 className="text-cream font-bold text-sm truncate group-hover:text-green-400 transition-colors">
-                                            {article.title}
-                                        </h3>
-                                        <p className="text-stone-400 text-xs">
-                                            {new Date(note.createdAt).toLocaleDateString('sv-SE')}
-                                        </p>
+                                <div className="flex justify-between items-start mb-4">
+                                    <div
+                                        className="flex items-center gap-3 pb-4 border-b border-stone-700/50 cursor-pointer group/item flex-1 overflow-hidden"
+                                        onClick={() => setActiveArticle(article)}
+                                    >
+                                        <img src={article.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                                        <div className="flex-1 overflow-hidden">
+                                            <h3 className="text-cream font-bold text-sm truncate group-hover/item:text-green-400 transition-colors">
+                                                {article.title}
+                                            </h3>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-stone-400 text-xs">
+                                                    {new Date(note.createdAt).toLocaleDateString('sv-SE')}
+                                                </p>
+                                                {note.highlightText && (
+                                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-[#50c878] bg-[#50c878]/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                                        <Highlighter size={8} /> Highlight
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={16} className="text-stone-500 group-hover/item:text-green-400 transition-colors shrink-0" />
                                     </div>
-                                    <ChevronRight size={16} className="text-stone-500 group-hover:text-green-400 transition-colors" />
+
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (confirm("Är du säker på att du vill radera denna anteckning?")) {
+                                                await deleteNoteMutation({ id: note._id || note.id });
+                                            }
+                                        }}
+                                        className="ml-3 p-1.5 rounded-lg text-stone-500 hover:text-red-400 hover:bg-stone-700/50 transition-all opacity-0 group-hover:opacity-100"
+                                        title="Radera anteckning"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
                                 </div>
-                                <p className="text-stone-300 font-sans text-sm leading-relaxed">
-                                    {note.text}
-                                </p>
+
+                                {note.highlightText && (
+                                    <div className={`pl-3 border-l-2 font-serif italic text-stone-300 text-sm mb-3 ${
+                                        note.color === 'green' ? 'border-emerald-400' :
+                                        note.color === 'blue' ? 'border-blue-400' :
+                                        note.color === 'purple' ? 'border-purple-400' : 'border-yellow-400'
+                                    }`}>
+                                        "{note.highlightText}"
+                                    </div>
+                                )}
+
+                                {note.text && note.text !== 'Highlight' && (
+                                    <p className="text-stone-300 font-sans text-sm leading-relaxed">
+                                        {note.text}
+                                    </p>
+                                )}
                             </motion.div>
                         );
                     })
