@@ -5,6 +5,7 @@ import { ChevronLeft, Bookmark, Share2, Clock, ArrowRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useMain } from "@/lib/MainContext";
 
 const COLORS = [
   { id: 'yellow', name: 'Gul', hex: '#FEF08A', class: 'highlight-yellow' },
@@ -82,9 +83,21 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
     const [noteText, setNoteText] = useState('');
     const [isSavingNote, setIsSavingNote] = useState(false);
 
-    // Fetch live Convex notes
-    const rawNotes = useQuery(api.notes.getByArticle, { articleId: article.id });
+    // Shared navigation + current user
+    const { openArticle, user } = useMain();
+
+    // Fetch this user's notes for the article (skip until identity resolves)
+    const rawNotes = useQuery(
+        api.notes.getByArticle,
+        user?.id ? { articleId: article.id, userId: user.id } : "skip"
+    );
     const savedNotes = rawNotes || [];
+
+    // Related articles
+    const related = useQuery(
+        api.articles.getRelated,
+        article ? { articleId: article._id ?? article.id, tag: article.tag } : "skip"
+    );
 
     const addNoteMutation = useMutation(api.notes.add);
     const deleteNoteMutation = useMutation(api.notes.remove);
@@ -93,7 +106,7 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
         if (!noteText.trim()) return;
         setIsSavingNote(true);
         try {
-            await addNoteMutation({ articleId: article.id, text: noteText });
+            await addNoteMutation({ articleId: article.id, text: noteText, userId: user?.id });
             setNoteText('');
         } catch (err) {
             console.error("Failed to add note", err);
@@ -144,6 +157,7 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                 text: selectionNote.trim() || 'Highlight',
                 highlightText: selectedText,
                 color: selectedColor,
+                userId: user?.id,
             });
             clearSelection();
             setSelectionNote('');
@@ -350,6 +364,47 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                             )}
                         </div>
 
+                        {/* Related Articles Section */}
+                        {related && related.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-black text-gray-900 leading-tight mb-6 tracking-tight font-serif">
+                                    Relaterat
+                                </h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {related.map((item) => (
+                                        <button
+                                            key={item._id}
+                                            onClick={() => openArticle({ ...item, id: item._id, date: new Date(item.date) })}
+                                            className="text-left bg-stone-50 border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition-shadow active:scale-[0.98]"
+                                        >
+                                            {item.image && (
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.title}
+                                                    className="w-full h-32 object-cover"
+                                                />
+                                            )}
+                                            <div className="p-4">
+                                                {item.tag && (
+                                                    <span className="text-blue-600 font-bold tracking-widest text-[10px] uppercase mb-1 block">
+                                                        {item.tag}
+                                                    </span>
+                                                )}
+                                                <h3 className="text-base font-bold text-gray-900 leading-snug mb-1 tracking-tight font-serif">
+                                                    {item.title}
+                                                </h3>
+                                                {item.summary && (
+                                                    <p className="text-sm text-gray-500 font-sans line-clamp-2">
+                                                        {item.summary}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="py-20 flex flex-col items-center justify-center opacity-40 space-y-2">
                             <div className="animate-bounce">
                                 <ArrowRight className="rotate-90 text-gray-400" />
@@ -490,7 +545,7 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                                     onClick={async (e) => {
                                         e.stopPropagation();
                                         try {
-                                            await deleteNoteMutation({ id: tooltipNote._id });
+                                            await deleteNoteMutation({ id: tooltipNote._id, userId: user?.id });
                                             setTooltipNote(null);
                                             setTooltipCoords(null);
                                         } catch (err) {

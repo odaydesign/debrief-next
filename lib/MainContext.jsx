@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAuthContext } from "@/lib/AuthContext";
 
 const MainContext = createContext(null);
 
@@ -36,7 +37,10 @@ export function formatArticles(rawArticles, interactions) {
 }
 
 export function MainProvider({ children }) {
-  const [user] = useState({ id: 'mock-user-123' });
+  // Real identity from Firebase Auth (anonymous-by-default). Until the first
+  // anonymous sign-in resolves, fbUser is null and Convex queries below "skip".
+  const { user: fbUser, loading: authLoading, isAnonymous, signInWithGoogle, signOut } = useAuthContext();
+  const user = fbUser ? { id: fbUser.uid } : null;
   const [activeArticle, setActiveArticle] = useState(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
@@ -80,6 +84,14 @@ export function MainProvider({ children }) {
 
   const value = {
     user,
+    // Auth surface for account UI
+    authLoading,
+    isAnonymous,
+    displayName: fbUser?.displayName ?? null,
+    photoURL: fbUser?.photoURL ?? null,
+    email: fbUser?.email ?? null,
+    signInWithGoogle,
+    signOut,
     activeArticle,
     isOverlayOpen,
     interactions,

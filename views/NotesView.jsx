@@ -5,9 +5,11 @@ import { FileText, ChevronRight, Trash2, Highlighter } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { useMain } from '@/lib/MainContext';
 
 const NotesView = ({ notes, articles, setActiveArticle }) => {
     const deleteNoteMutation = useMutation(api.notes.remove);
+    const { user } = useMain();
 
     return (
         <div className="pb-32 px-6 pt-12 min-h-screen bg-stone-900 border-x border-stone-800 animate-in fade-in duration-500">
@@ -65,7 +67,7 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             if (confirm("Är du säker på att du vill radera denna anteckning?")) {
-                                                await deleteNoteMutation({ id: note._id || note.id });
+                                                await deleteNoteMutation({ id: note._id || note.id, userId: user?.id });
                                             }
                                         }}
                                         className="ml-3 p-1.5 rounded-lg text-stone-500 hover:text-red-400 hover:bg-stone-700/50 transition-all opacity-0 group-hover:opacity-100"

@@ -40,11 +40,16 @@ export default defineSchema({
 
     notes: defineTable({
         articleId: v.id("articles"),
+        userId: v.optional(v.string()), // optional: pre-auth notes had no owner
         text: v.string(),
         createdAt: v.string(),
+        updatedAt: v.optional(v.string()), // set when a note is edited
         highlightText: v.optional(v.string()),
         color: v.optional(v.string()),
-    }).index("by_article", ["articleId"]),
+    })
+        .index("by_article", ["articleId"])
+        .index("by_user", ["userId"])
+        .index("by_user_article", ["userId", "articleId"]),
 
     searchBundles: defineTable({
         userId: v.string(),

@@ -66,6 +66,22 @@ export const getUserInteractions = query({
     }
 });
 
+export const getRelated = query({
+    args: {
+        articleId: v.id("articles"),
+        tag: v.optional(v.string()),
+        limit: v.optional(v.number()),
+    },
+    handler: async (ctx, args) => {
+        const limit = args.limit ?? 4;
+        const all = await ctx.db.query("articles").order("desc").collect();
+        const others = all.filter((a) => a._id !== args.articleId);
+        const sameTag = args.tag ? others.filter((a) => a.tag === args.tag) : [];
+        const backfill = others.filter((a) => !sameTag.includes(a));
+        return [...sameTag, ...backfill].slice(0, limit);
+    },
+});
+
 
 // --- Mutations ---
 

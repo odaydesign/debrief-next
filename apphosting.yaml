@@ -18,3 +18,35 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+  # Firebase Auth (project debrief-3ef06). Public client config.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyCBg2bK_PpPDT1gUc2FUBLUvF5wYzpxyaQ
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: debrief-3ef06.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: debrief-3ef06
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: debrief-3ef06.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "1020404599093"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:1020404599093:web:bc3beca3912cd7c6bd647c
+    availability:
+      - BUILD
+      - RUNTIME

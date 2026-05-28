@@ -3,6 +3,7 @@
 import { MainProvider, useMain } from "@/lib/MainContext";
 import ArticleOverlay from "@/components/ArticleOverlay";
 import BottomNav from "@/components/BottomNav";
+import AccountButton from "@/components/AccountButton";
 
 function MainLayoutInner({ children }) {
   const { activeArticle, isOverlayOpen, closeOverlay } = useMain();
@@ -21,6 +22,9 @@ function MainLayoutInner({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Floating account control */}
+      <AccountButton />
 
       {/* Floating Navigation */}
       <BottomNav />
