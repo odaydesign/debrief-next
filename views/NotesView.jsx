@@ -81,7 +81,7 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                         note.color === 'blue' ? 'border-blue-400' :
                                         note.color === 'purple' ? 'border-purple-400' : 'border-yellow-400'
                                     }`}>
-                                        "{note.highlightText}"
+                                        &ldquo;{note.highlightText}&rdquo;
                                     </div>
                                 )}
 

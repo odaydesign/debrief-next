@@ -340,7 +340,7 @@ const ArticleReader = ({ article, onClose, onBookmark }) => {
                                                     n.color === 'blue' ? 'border-blue-400' :
                                                     n.color === 'purple' ? 'border-purple-400' : 'border-yellow-400'
                                                 }`}>
-                                                    "{n.highlightText}"
+                                                    &ldquo;{n.highlightText}&rdquo;
                                                 </p>
                                             )}
                                             <p className="text-gray-700 font-sans text-sm">{n.text}</p>
