@@ -6,8 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SwipeableCard from "@/components/SwipeableCard";
 import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
 import CustomModal from "@/components/CustomModal";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useMutation, api } from "@/lib/db";
 
 const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
     const [searchQuery, setSearchQuery] = useState('');

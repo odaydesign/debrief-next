@@ -5,8 +5,7 @@ import { X, Plus, Bookmark, FolderHeart, Tag, Trash2, Edit2 } from 'lucide-react
 import { AnimatePresence, motion } from 'framer-motion';
 import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
 import CustomModal from "@/components/CustomModal";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useMutation, api } from "@/lib/db";
 
 const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, bookmarkCollections, createCollection, isReaderOpen, bundles }) => {
     const [selectedBundle, setSelectedBundle] = useState(null); // null means showing actual bookmarks

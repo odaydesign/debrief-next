@@ -1,5 +1,5 @@
 import { Playfair_Display, Inter } from "next/font/google";
-import { ConvexClientProvider } from "./providers";
+import { AppProviders } from "./providers";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -29,9 +29,9 @@ export default function RootLayout({ children }) {
       className={`${playfairDisplay.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <ConvexClientProvider>
+        <AppProviders>
           {children}
-        </ConvexClientProvider>
+        </AppProviders>
       </body>
     </html>
   );

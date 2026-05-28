@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useQuery, useMutation, api } from "@/lib/db";
 import { Plus, Edit2, Trash2, Search, Calendar, Tag, AlertCircle } from 'lucide-react';
 import CustomModal from "@/components/CustomModal";
 

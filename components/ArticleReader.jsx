@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Bookmark, Share2, Clock, ArrowRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useQuery, useMutation, api } from "@/lib/db";
 import { useMain } from "@/lib/MainContext";
 
 const COLORS = [

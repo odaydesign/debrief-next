@@ -2,24 +2,13 @@
 # https://firebase.google.com/docs/app-hosting/configure
 #
 # Env vars marked NEXT_PUBLIC_* are bundled into the client by Next.js
-# and are intentionally public — same value lives in .env.local for
-# local dev. If/when you switch to a production Convex deployment,
-# update these values (and only these) to the prod URL.
+# and are intentionally public — same values live in .env.local for
+# local dev. Data lives in Firestore + Storage (project debrief-3ef06),
+# read directly via the Firebase web SDK (see lib/firebase.js, lib/db.js).
 
 env:
-  - variable: NEXT_PUBLIC_CONVEX_URL
-    value: https://small-gazelle-643.eu-west-1.convex.cloud
-    availability:
-      - BUILD     # needed because `/archive` prerenders ConvexReactClient
-      - RUNTIME
-
-  - variable: NEXT_PUBLIC_CONVEX_SITE_URL
-    value: https://small-gazelle-643.eu-west-1.convex.site
-    availability:
-      - BUILD
-      - RUNTIME
-
-  # Firebase Auth (project debrief-3ef06). Public client config.
+  # Firebase config (project debrief-3ef06). Public client config, used for
+  # Auth + Firestore + Storage.
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
     value: AIzaSyCBg2bK_PpPDT1gUc2FUBLUvF5wYzpxyaQ
     availability:

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { uploadFile } from "@/lib/db";
 import { X, Upload, Link as LinkIcon, Image as ImageIcon, Play, AlertCircle } from 'lucide-react';
 
 const MediaModal = ({ isOpen, onClose, onInsert, initialTab = 'upload' }) => {
@@ -11,9 +10,6 @@ const MediaModal = ({ isOpen, onClose, onInsert, initialTab = 'upload' }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
     const fileInputRef = useRef(null);
-
-    const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-    const generateFileUrl = useMutation(api.files.generateFileUrl);
 
     if (!isOpen) return null;
 
@@ -42,22 +38,8 @@ const MediaModal = ({ isOpen, onClose, onInsert, initialTab = 'upload' }) => {
         try {
             // We can handle multiple files by looping
             for (const file of files) {
-                // 1. Get an upload URL from Convex
-                const postUrl = await generateUploadUrl();
-
-                // 2. POST the file securely to the URL
-                const result = await fetch(postUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": file.type },
-                    body: file,
-                });
-
-                if (!result.ok) throw new Error("Upload failed");
-
-                const { storageId } = await result.json();
-
-                // 3. Retrieve public URL via Convex
-                const publicUrl = await generateFileUrl({ storageId });
+                // Upload to Firebase Storage and get the public download URL.
+                const publicUrl = await uploadFile(file);
 
                 if (!publicUrl) throw new Error("Could not retrieve file URL");
 

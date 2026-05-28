@@ -2,8 +2,7 @@
 
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useQuery, api } from "@/lib/db";
 import EditorView from "@/views/EditorView";
 
 export default function EditEditorPage({ params }) {

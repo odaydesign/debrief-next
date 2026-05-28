@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Articles are public to read; only trusted/admin writes (done off-client,
+    // e.g. via the Admin SDK or console). Client SDK writes are denied so the
+    // public feed can't be tampered with.
+    match /articles/{articleId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Notes belong to a single user. Reads/updates/deletes require ownership;
+    // creates require the new doc to be stamped with the caller's uid.
+    match /notes/{noteId} {
+      allow read:           if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create:         if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Per-user read/bookmark state. Same owner-only model.
+    match /userInteractions/{interactionId} {
+      allow read:           if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create:         if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Saved search bundles (smart folders). Owner-only.
+    match /searchBundles/{bundleId} {
+      allow read:           if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create:         if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

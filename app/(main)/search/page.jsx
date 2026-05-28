@@ -1,7 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useQuery, api } from "@/lib/db";
 import { useMain, formatArticles } from "@/lib/MainContext";
 import SearchView from "@/views/SearchView";
 

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useMutation, useQuery, api } from "@/lib/db";
 import { useAuthContext } from "@/lib/AuthContext";
 
 const MainContext = createContext(null);
@@ -38,7 +37,7 @@ export function formatArticles(rawArticles, interactions) {
 
 export function MainProvider({ children }) {
   // Real identity from Firebase Auth (anonymous-by-default). Until the first
-  // anonymous sign-in resolves, fbUser is null and Convex queries below "skip".
+  // anonymous sign-in resolves, fbUser is null and Firestore queries below "skip".
   const { user: fbUser, loading: authLoading, isAnonymous, signInWithGoogle, signOut } = useAuthContext();
   const user = fbUser ? { id: fbUser.uid } : null;
   const [activeArticle, setActiveArticle] = useState(null);
@@ -73,11 +72,10 @@ export function MainProvider({ children }) {
 
   const toggleBookmark = useCallback((id, collectionId = 'all') => {
     if (!user) return;
-    // We just call the mutation — real-time Convex will update the UI
+    // The mutation flips the stored isBookmarked; real-time Firestore updates the UI.
     toggleBookmarkMutation({
       userId: user.id,
       articleId: id,
-      isBookmarked: true, // Toggle is handled by the mutation
       collectionId,
     });
   }, [user, toggleBookmarkMutation]);

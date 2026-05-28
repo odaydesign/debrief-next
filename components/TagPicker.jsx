@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useQuery, api } from "@/lib/db";
 import { Tag, Plus, X } from 'lucide-react';
 
 const TagPicker = ({ value, onChange }) => {

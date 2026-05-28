@@ -3,8 +3,7 @@
 import React from 'react';
 import { FileText, ChevronRight, Trash2, Highlighter } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { useMutation, api } from '@/lib/db';
 import { useMain } from '@/lib/MainContext';
 
 const NotesView = ({ notes, articles, setActiveArticle }) => {

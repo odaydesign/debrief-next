@@ -2,8 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { ImageIcon, Upload, Crosshair, X, Palette } from 'lucide-react';
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { uploadFile } from "@/lib/db";
 
 const CoverImageEditor = ({
     imageUrl,
@@ -20,9 +19,6 @@ const CoverImageEditor = ({
     const [isUploading, setIsUploading] = useState(false);
     const [urlInput, setUrlInput] = useState('');
     const [showUrlInput, setShowUrlInput] = useState(false);
-
-    const generateUploadUrl = useMutation(api.files.generateUploadUrl);
-    const generateFileUrl = useMutation(api.files.generateFileUrl);
 
     const handleImageClick = (e) => {
         if (!imageRef.current) return;
@@ -41,15 +37,7 @@ const CoverImageEditor = ({
 
         setIsUploading(true);
         try {
-            const postUrl = await generateUploadUrl();
-            const result = await fetch(postUrl, {
-                method: "POST",
-                headers: { "Content-Type": file.type },
-                body: file,
-            });
-            if (!result.ok) throw new Error("Upload failed");
-            const { storageId } = await result.json();
-            const publicUrl = await generateFileUrl({ storageId });
+            const publicUrl = await uploadFile(file);
             if (publicUrl) onImageChange(publicUrl);
         } catch (err) {
             console.error("Upload error:", err);
@@ -76,15 +64,7 @@ const CoverImageEditor = ({
 
         setIsUploading(true);
         try {
-            const postUrl = await generateUploadUrl();
-            const result = await fetch(postUrl, {
-                method: "POST",
-                headers: { "Content-Type": file.type },
-                body: file,
-            });
-            if (!result.ok) throw new Error("Upload failed");
-            const { storageId } = await result.json();
-            const publicUrl = await generateFileUrl({ storageId });
+            const publicUrl = await uploadFile(file);
             if (publicUrl) onImageChange(publicUrl);
         } catch (err) {
             console.error("Upload error:", err);

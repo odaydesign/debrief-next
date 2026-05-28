@@ -8,8 +8,7 @@ import TagPicker from "@/components/TagPicker";
 import CoverImageEditor from "@/components/CoverImageEditor";
 import EditorSettingsDrawer, { TEMPLATES } from "@/components/EditorSettingsDrawer";
 import CustomModal from "@/components/CustomModal";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useMutation, api } from "@/lib/db";
 import { extractThemeFromImage } from "@/lib/colorUtils";
 
 const EditorView = ({ articleToEdit, onPublish, onCancel }) => {
