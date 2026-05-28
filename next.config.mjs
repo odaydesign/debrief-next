@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Next.js 16: the `eslint` config key is removed — `next build` no longer
+  // runs linting. Use `npm run lint` (eslint CLI) directly when you want it.
   typescript: {
     ignoreBuildErrors: true,
   },
