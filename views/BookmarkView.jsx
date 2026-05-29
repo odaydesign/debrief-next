@@ -213,8 +213,8 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                             {displayArticles.length} {selectedBundle ? 'i denna bundle' : 'sparade artiklar'}
                         </p>
                         <div className="w-full flex justify-center px-4">
-                            <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px] 2xl:max-w-[1432px]">
-                                <div className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4 gap-6 space-y-6">
+                            <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px]">
+                                <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
                                     {displayArticles.map((article, index) => (
                                         <div key={`bookmark-wrapper-${article.id}`} className="relative group">
                                             <FadeInCard

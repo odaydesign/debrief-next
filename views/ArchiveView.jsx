@@ -179,7 +179,7 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
                         </header>
 
                         {/* Grid of Archive Stacks */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-[1200px] mx-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-[1200px] mx-auto">
                             {groups.map(([label, groupArticles]) => (
                                 <ArchiveStackNode
                                     key={label}
@@ -224,8 +224,8 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
                         </div>
 
                         <main className="w-full flex justify-center pb-32 pt-8 px-4">
-                            <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px] 2xl:max-w-[1432px]">
-                                <div className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4 gap-6 space-y-6">
+                            <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px]">
+                                <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
                                     {openGroup.articles.map((card, index) => (
                                         <FadeInCard key={`archive-${card.id || index}`} index={index} onClick={() => setActiveArticle(card)}>
                                             <CardContent data={card} />

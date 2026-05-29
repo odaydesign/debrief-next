@@ -27,8 +27,8 @@ const generateWeekStacks = (baseDate, articles) => {
 const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
   const lead     = articles[0];
   const sidebar  = articles.slice(1, 3);
-  const mid      = articles.slice(3, 7);
-  const rest     = articles.slice(7);
+  const mid      = articles.slice(3, 6);
+  const rest     = articles.slice(6);
 
   const tags = [...new Set(articles.map(a => a.tag || a.category).filter(Boolean))];
 
@@ -115,7 +115,7 @@ const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
                 <div className="flex items-center gap-4 pt-1">
                   <div className="flex-1 h-px bg-[#E8E6E1]" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-7">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
                   {mid.map((a, i) => (
                     <FadeInCard key={a._id || a.id || i} index={i + 3} onClick={() => {}}>
                       <MagazineCard data={a} onClick={onArticleClick} />
@@ -132,7 +132,7 @@ const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
                   <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#999] shrink-0">Fler</span>
                   <div className="flex-1 h-px bg-[#E8E6E1]" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-7">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
                   {rest.map((a, i) => (
                     <FadeInCard key={a._id || a.id || i} index={i} onClick={() => {}}>
                       <GridCard data={a} onClick={onArticleClick} />
