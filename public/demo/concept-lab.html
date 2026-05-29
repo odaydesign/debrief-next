@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Debrief — Concept Lab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { dark:'#46423f', deep:'#3b3835', paper:'#f6f4f1', ink:'#2a2726', green:'#50c878' },
+      fontFamily: { serif:['Fraunces','Georgia','serif'], sans:['Inter','system-ui','sans-serif'] },
+    }}
+  }
+</script>
+<style>
+  body{-webkit-font-smoothing:antialiased}
+  .clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .muted-img{filter:grayscale(.3) contrast(.96) brightness(.95)}
+  .card{transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease}
+  .card:hover{transform:translateY(-6px)}
+  .card:hover .arrow{opacity:1;transform:translateX(0)}
+  .arrow{opacity:0;transform:translateX(-5px);transition:all .3s ease}
+  .card:hover .zoom{transform:scale(1.05)}
+  .zoom{transition:transform .7s cubic-bezier(.16,1,.3,1)}
+  /* reader overlay */
+  #reader{transition:opacity .4s ease}
+  #reader .sheet{transition:transform .5s cubic-bezier(.16,1,.3,1), opacity .4s ease}
+  #reader.expand .sheet{transform:scale(.92) translateY(40px);opacity:0}
+  #reader.expand.show .sheet{transform:scale(1) translateY(0);opacity:1}
+  #reader.takeover .sheet{transform:translateY(100%)}
+  #reader.takeover.show .sheet{transform:translateY(0)}
+  .seg{transition:all .2s ease}
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+</style>
+</head>
+<body class="bg-dark text-paper font-sans">
+
+<!-- ══ TOP NAV ══ -->
+<header class="sticky top-0 z-40 bg-dark/90 backdrop-blur border-b border-white/10">
+  <div class="max-w-[1200px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="font-serif text-xl tracking-tight">Debrief</span>
+      <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-green border border-green/40 rounded-full px-2 py-0.5">Concept Lab</span>
+    </div>
+    <nav class="flex items-center gap-1 text-[13px]" id="tabs">
+      <button data-tab="cards"   class="tab px-3 py-1.5 rounded-full">Kort</button>
+      <button data-tab="open"    class="tab px-3 py-1.5 rounded-full">Öppna</button>
+      <button data-tab="reader"  class="tab px-3 py-1.5 rounded-full">Läsvy</button>
+      <button data-tab="list"    class="tab px-3 py-1.5 rounded-full">Läslista</button>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto px-5 md:px-8">
+
+<!-- ══════════ TAB 1 · CARDS ══════════ -->
+<section data-panel="cards" class="py-12">
+  <p class="text-[11px] font-bold tracking-[0.25em] uppercase text-green mb-2">Kortkoncept · förfinat</p>
+  <h1 class="font-serif text-3xl md:text-[2.6rem] leading-tight mb-3">Samma kortidé — tre förfinade riktningar</h1>
+  <p class="text-white/55 max-w-2xl mb-7 text-[15px] leading-relaxed">Vi behåller affischkortet du gillar. Växla mellan stilarna nedan för att se samma innehåll i varje riktning — eller "Mix" som låter korttypen styra. Klicka på vilket kort som helst för att se hur det öppnas.</p>
+
+  <div class="inline-flex flex-wrap gap-1 bg-white/5 border border-white/10 rounded-full p-1 mb-3" id="styleSeg">
+    <button data-style="mix"  class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">Mix</button>
+    <button data-style="A"    class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">A · Förfinad affisch</button>
+    <button data-style="B"    class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">B · Bildledd</button>
+    <button data-style="C"    class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">C · Färgblock</button>
+  </div>
+  <p class="text-[12px] text-white/40 mb-8" id="styleDesc"></p>
+
+  <div id="cardGrid" class="columns-1 md:columns-2 xl:columns-3 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid"></div>
+</section>
+
+<!-- ══════════ TAB 2 · OPEN ══════════ -->
+<section data-panel="open" class="py-12 hidden">
+  <p class="text-[11px] font-bold tracking-[0.25em] uppercase text-green mb-2">Interaktion</p>
+  <h1 class="font-serif text-3xl md:text-[2.6rem] leading-tight mb-3">Hur ett kort öppnas</h1>
+  <p class="text-white/55 max-w-2xl mb-7 text-[15px] leading-relaxed">Välj öppningsstil — den gäller överallt i prototypen. Klicka på kortet (eller "Öppna") för att se övergången till läsvyn.</p>
+
+  <div class="inline-flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 mb-8" id="openSeg">
+    <button data-open="expand"   class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">Expandera (skala upp)</button>
+    <button data-open="takeover" class="seg px-4 py-1.5 rounded-full text-[13px] font-medium">Övertag (skjut upp)</button>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-8 items-start">
+    <div id="openSample"></div>
+    <div class="text-[14px] text-white/55 leading-relaxed space-y-4">
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <p class="text-green text-[11px] font-bold tracking-[0.2em] uppercase mb-2">Expandera</p>
+        Kortet skalas upp till ett ark i mitten med dämpad bakgrund. Snabbt, behåller kontext — bra för en snabb genomläsning utan att lämna flödet.
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <p class="text-green text-[11px] font-bold tracking-[0.2em] uppercase mb-2">Övertag</p>
+        Läsvyn skjuts upp och tar hela skärmen. Mer fokuserad läsning — bra för längre briefer. Svep/stäng tar dig tillbaka.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TAB 3 · READER (inline preview) ══════════ -->
+<section data-panel="reader" class="py-12 hidden">
+  <p class="text-[11px] font-bold tracking-[0.25em] uppercase text-green mb-2">Läsupplevelse</p>
+  <h1 class="font-serif text-3xl md:text-[2.6rem] leading-tight mb-3">Läsvyn speglar kortet</h1>
+  <p class="text-white/55 max-w-2xl mb-7 text-[15px] leading-relaxed">Samma kicker → rubrik → ingress-rytm fortsätter in i artikeln. Förhandsvisning nedan; klicka "Öppna i helskärm" för riktig övergång.</p>
+  <div id="readerInline" class="rounded-[1.75rem] overflow-hidden border border-white/10"></div>
+</section>
+
+<!-- ══════════ TAB 4 · READING LIST ══════════ -->
+<section data-panel="list" class="py-12 hidden">
+  <p class="text-[11px] font-bold tracking-[0.25em] uppercase text-green mb-2">Läslista</p>
+  <h1 class="font-serif text-3xl md:text-[2.6rem] leading-tight mb-3">Sparat att läsa</h1>
+  <p class="text-white/55 max-w-2xl mb-8 text-[15px] leading-relaxed">Kompakt radlayout med miniatyr, lästid och läsförlopp. Bokmärket växlar sparat läge. Klicka en rad för att öppna.</p>
+  <div id="listGroups"></div>
+</section>
+
+</main>
+
+<footer class="max-w-[1200px] mx-auto px-5 md:px-8 py-10 mt-8 border-t border-white/10 text-[12px] text-white/35">
+  Debrief Concept Lab · interaktiv prototyp · appen är oförändrad
+</footer>
+
+<!-- ══ READER OVERLAY ══ -->
+<div id="reader" class="fixed inset-0 z-50 opacity-0 pointer-events-none">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeReader()"></div>
+  <div class="sheet absolute inset-x-0 bottom-0 top-0 md:top-10 md:inset-x-[max(0px,calc(50%-460px))] bg-deep rounded-t-[1.75rem] overflow-y-auto">
+    <div id="readerBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── sample data ─────────────────────────────────────────────
+const ART = [
+  { id:1, kind:'image', tag:'AI', title:'OpenAI släpper realtidsröst som kan avbrytas mitt i meningen', dek:'Naturlig prosodi och noll väntetid — ett tydligt steg mot samtal som känns mänskliga.', source:'OpenAI Blog', time:'2 min', img:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80' },
+  { id:2, kind:'color', tag:'Citat', bg:'#e9c46a', fg:'#2a2726', title:'"Det bästa gränssnittet är det du inte märker."', dek:'— En påminnelse inför veckans designgenomgång.', source:'Redaktionen', time:'1 min' },
+  { id:3, kind:'image', tag:'Design', title:'Figma binder typografi till tokens direkt i canvas', dek:'Slutet på frikopplade textstilar — variabler styr nu storlek och radavstånd live.', source:'Figma', time:'2 min', img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80' },
+  { id:4, kind:'standard', tag:'Startup', title:'Lovable tar in 200 MSEK i runda ledd av EQT Ventures', dek:'Kapitalet går till enterprise-funktioner och USA-expansion. Värderingen tredubblas på ett år.', source:'Di Digital', time:'3 min' },
+  { id:5, kind:'color', tag:'Siffra', bg:'#e76f51', fg:'#fff', title:'7%', dek:'av global omsättning — det nya bötestaket i EU:s AI-förordning som träder i kraft idag.', source:'EU-kommissionen', time:'1 min' },
+  { id:6, kind:'image', tag:'Teknik', title:'Apple flyttar Siri till on-device-modell i höstens iOS', dek:'Lägre latens och allt stannar på enheten — ett integritetsdrag inför WWDC.', source:'9to5Mac', time:'2 min', img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&q=80' },
+  { id:7, kind:'standard', tag:'AI', title:'Anthropic öppnar Claude för agent-arbetsflöden i molnet', dek:'Långa verktygsdrivna uppgifter kan köras utan att hålla en session öppen — riktat mot bakgrundsjobb.', source:'Anthropic', time:'2 min' },
+  { id:8, kind:'image', tag:'Inspiration', title:'Hur Monocle bygger ett tidlöst rutnät', dek:'Få kolumner, generösa marginaler, en enda accentfärg — en närläsning av magasinets lugn.', source:'Essä', time:'5 min', img:'https://images.unsplash.com/photo-1497005367839-6e852de72767?w=800&q=80' },
+  { id:9, kind:'color', tag:'Väder', bg:'#6d9dc5', fg:'#fff', title:'18° · Klart', dek:'Stockholm idag. Lätt bris från sydväst, ingen nederbörd.', source:'SMHI', time:'' },
+];
+
+const styleDescs = {
+  mix:'Mix — varje korttyp får sin naturliga stil (bild→B, citat/siffra→C, text→A). Så här ser ett riktigt flöde ut.',
+  A:'A · Förfinad affisch — behåller den centrerade affischkänslan, men med stramare typskala, enhetligt bildformat och en diskret "Läs →" istället för knapp.',
+  B:'B · Bildledd — bilden fyller toppen, innehåll vänsterställt under. Modern, redaktionell, bra för starka bilder.',
+  C:'C · Färgblock — de färgglada textkorten (citat, siffror, väder) förfinade: tydlig hierarki, ingen överflödig knapp.',
+};
+
+// ─── card renderers (keep poster DNA, three refinements) ─────
+function tagPill(a, tone){ // tone: 'light' on paper, 'onColor' on color block
+  const cls = tone==='onColor' ? 'bg-black/10 text-current' : 'bg-green/15 text-green';
+  return `<span class="${cls} px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] uppercase">${a.tag}</span>`;
+}
+function metaRow(a, tone){
+  const c = tone==='onColor' ? 'text-current/60' : (tone==='dark'?'text-white/40':'text-ink/45');
+  const ac = tone==='onColor' ? 'text-current' : 'text-green';
+  return `<div class="mt-4 flex items-center gap-2 text-[11px] font-medium ${c}">
+      ${a.source?`<span>${a.source}</span>`:''}${a.source&&a.time?'<span class="opacity-40">·</span>':''}${a.time?`<span>${a.time}</span>`:''}
+      <span class="arrow ml-auto ${ac} text-base">→</span></div>`;
+}
+
+// A — refined centered poster (paper)
+function cardA(a){
+  return `<article class="card cursor-pointer rounded-[1.75rem] bg-paper text-ink p-7 flex flex-col items-center text-center" onclick="openReader(${a.id})">
+    ${tagPill(a,'light')}
+    ${a.img?`<div class="w-full aspect-[4/3] rounded-2xl overflow-hidden my-5"><img src="${a.img}" class="zoom w-full h-full object-cover muted-img"></div>`:'<div class="h-2"></div>'}
+    <h3 class="font-serif text-[1.5rem] leading-snug tracking-tight ${a.img?'mb-3':'my-3'} clamp-3">${a.title}</h3>
+    <p class="text-[14px] leading-relaxed text-ink/60 clamp-2">${a.dek}</p>
+    <div class="w-full">${metaRow(a,'light')}</div>
+  </article>`;
+}
+// B — image-led (image fills top, content left)
+function cardB(a){
+  const img = a.img || 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80';
+  return `<article class="card cursor-pointer rounded-[1.75rem] overflow-hidden bg-paper text-ink" onclick="openReader(${a.id})">
+    <div class="aspect-[16/10] overflow-hidden"><img src="${img}" class="zoom w-full h-full object-cover muted-img"></div>
+    <div class="p-6 text-left">
+      <div class="mb-2">${tagPill(a,'light')}</div>
+      <h3 class="font-serif text-[1.5rem] leading-snug tracking-tight mb-2 clamp-3">${a.title}</h3>
+      <p class="text-[14px] leading-relaxed text-ink/60 clamp-2">${a.dek}</p>
+      ${metaRow(a,'light')}
+    </div>
+  </article>`;
+}
+// C — color block (no image, bold)
+function cardC(a){
+  const bg = a.bg || '#605c59', fg = a.fg || '#f6f4f1';
+  return `<article class="card cursor-pointer rounded-[1.75rem] p-8 flex flex-col items-center text-center min-h-[230px] justify-center" style="background:${bg};color:${fg}" onclick="openReader(${a.id})">
+    ${tagPill(a,'onColor')}
+    <h3 class="font-serif ${String(a.title).length<8?'text-6xl':'text-[1.7rem]'} leading-[1.05] tracking-tight my-4 clamp-3">${a.title}</h3>
+    <p class="text-[14px] leading-relaxed opacity-75 clamp-2">${a.dek}</p>
+    <div class="w-full">${metaRow(a,'onColor')}</div>
+  </article>`;
+}
+function renderCard(a, style){
+  if(style==='A') return cardA(a);
+  if(style==='B') return cardB(a);
+  if(style==='C') return cardC(a);
+  // mix
+  if(a.kind==='color') return cardC(a);
+  if(a.kind==='image')  return cardB(a);
+  return cardA(a);
+}
+function drawCards(style){
+  document.getElementById('cardGrid').innerHTML = ART.map(a=>renderCard(a,style)).join('');
+  document.getElementById('styleDesc').textContent = styleDescs[style];
+}
+
+// ─── reader content ──────────────────────────────────────────
+function readerHTML(a, withClose){
+  const img = a.img || 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&q=80';
+  return `
+  <div class="relative">
+    ${withClose?`<button onclick="closeReader()" class="sticky top-0 z-10 m-4 flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-white/50 hover:text-paper"><span class="text-base">←</span> Tillbaka</button>`:''}
+    <div class="px-6 md:px-12 pt-2 pb-16 max-w-[680px] mx-auto">
+      <span class="text-[11px] font-bold tracking-[0.22em] uppercase text-green">${a.tag}</span>
+      <h1 class="font-serif text-[2rem] md:text-[2.7rem] leading-[1.06] tracking-tight mt-3 mb-5">${a.title}</h1>
+      <div class="flex items-center gap-2 text-[12px] text-white/45 mb-7">
+        <span>${a.source||'Debrief'}</span><span class="opacity-40">·</span><span>${a.time||'2 min'}</span><span class="opacity-40">·</span><span>29 maj 2026</span>
+        <button class="ml-auto flex items-center gap-1.5 text-white/60 hover:text-green"><span>☆</span> Spara</button>
+      </div>
+      <div class="aspect-[16/9] rounded-2xl overflow-hidden mb-8"><img src="${img}" class="w-full h-full object-cover muted-img"></div>
+      <p class="font-serif text-[1.3rem] leading-relaxed text-paper/90 mb-6">${a.dek}</p>
+      <p class="text-[16px] leading-[1.75] text-white/70 mb-5">Detta är en förhandsvisning av läsupplevelsen. Brödtexten håller en lugn radlängd på ~65 tecken, generöst radavstånd och samma serif som rubriken — så att språnget från kort till artikel känns sömlöst.</p>
+      <blockquote class="border-l-2 border-green pl-5 my-8 font-serif text-[1.45rem] leading-snug text-paper/90">"Korten är ingången, läsvyn är belöningen — de ska tala samma formspråk."</blockquote>
+      <h2 class="font-serif text-[1.4rem] mt-9 mb-3">Vad det betyder</h2>
+      <p class="text-[16px] leading-[1.75] text-white/70 mb-5">Kickern, rubriken och ingressen är desamma som på kortet. Endast skalan och mängden text växer. Det gör att läsaren aldrig tappar tråden mellan flöde och artikel.</p>
+      <p class="text-[16px] leading-[1.75] text-white/70 mb-10">En diskret accent (grönt) markerar kategori och interaktion. Allt annat vilar i den neutrala pappers-/mörkerskalan.</p>
+      <div class="border-t border-white/10 pt-7">
+        <p class="text-[11px] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">Läs vidare</p>
+        <div class="space-y-4">
+          ${ART.filter(x=>x.id!==a.id).slice(0,3).map(x=>`
+            <div class="flex items-start gap-3 cursor-pointer group" onclick="openReader(${x.id})">
+              <div class="flex-1"><span class="text-[10px] font-bold tracking-[0.18em] uppercase text-green">${x.tag}</span>
+                <h3 class="font-serif text-[1.1rem] leading-snug group-hover:text-green transition-colors clamp-2">${x.title}</h3></div>
+              ${x.img?`<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0"><img src="${x.img}" class="w-full h-full object-cover muted-img"></div>`:''}
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── open behaviour ──────────────────────────────────────────
+let openStyle = 'expand';
+function openReader(id){
+  const a = ART.find(x=>x.id===id); if(!a) return;
+  const r = document.getElementById('reader');
+  document.getElementById('readerBody').innerHTML = readerHTML(a, true);
+  r.className = `fixed inset-0 z-50 ${openStyle}`;
+  r.style.opacity='1'; r.style.pointerEvents='auto';
+  requestAnimationFrame(()=> r.classList.add('show'));
+  document.body.style.overflow='hidden';
+}
+function closeReader(){
+  const r = document.getElementById('reader');
+  r.classList.remove('show'); r.style.opacity='0';
+  setTimeout(()=>{ r.style.pointerEvents='none'; document.body.style.overflow=''; }, 400);
+}
+
+// ─── reading list ────────────────────────────────────────────
+function listRow(a, prog){
+  const img = a.img || 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&q=80';
+  return `<div class="card cursor-pointer rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] p-4 flex items-center gap-4" onclick="openReader(${a.id})">
+    <div class="w-16 h-16 rounded-xl overflow-hidden shrink-0"><img src="${img}" class="w-full h-full object-cover muted-img"></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-bold tracking-[0.18em] uppercase text-green">${a.tag}</span><span class="text-[11px] text-white/35">${a.time}</span></div>
+      <h3 class="font-serif text-[1.15rem] leading-snug clamp-1">${a.title}</h3>
+      <div class="mt-2 h-1 rounded-full bg-white/10 overflow-hidden"><div class="h-full bg-green" style="width:${prog}%"></div></div>
+    </div>
+    <button onclick="event.stopPropagation();this.classList.toggle('text-green');this.classList.toggle('text-white/30')" class="text-green text-lg shrink-0">★</button>
+  </div>`;
+}
+function drawList(){
+  const today = [ART[0],ART[2],ART[5]], earlier=[ART[7],ART[3]];
+  const progs=[60,0,100,25,0];
+  document.getElementById('listGroups').innerHTML = `
+    <p class="text-[11px] font-bold tracking-[0.2em] uppercase text-white/40 mb-3">Idag</p>
+    <div class="space-y-3 mb-9">${today.map((a,i)=>listRow(a,progs[i])).join('')}</div>
+    <p class="text-[11px] font-bold tracking-[0.2em] uppercase text-white/40 mb-3">Tidigare</p>
+    <div class="space-y-3">${earlier.map((a,i)=>listRow(a,progs[i+3])).join('')}</div>`;
+}
+
+// ─── tabs + segments wiring ──────────────────────────────────
+function setActive(group, el){ group.querySelectorAll('button').forEach(b=>{b.classList.remove('bg-green','text-ink','bg-white/10','text-paper')}); }
+function styleSegPaint(sel){ document.querySelectorAll('#styleSeg .seg').forEach(b=>{ const on=b.dataset.style===sel; b.className=`seg px-4 py-1.5 rounded-full text-[13px] font-medium ${on?'bg-green text-ink':'text-white/60 hover:text-paper'}`; }); }
+function openSegPaint(sel){ document.querySelectorAll('#openSeg .seg').forEach(b=>{ const on=b.dataset.open===sel; b.className=`seg px-4 py-1.5 rounded-full text-[13px] font-medium ${on?'bg-green text-ink':'text-white/60 hover:text-paper'}`; }); }
+function tabPaint(sel){ document.querySelectorAll('#tabs .tab').forEach(b=>{ const on=b.dataset.tab===sel; b.className=`tab px-3 py-1.5 rounded-full ${on?'bg-white/10 text-paper':'text-white/55 hover:text-paper'}`; }); }
+
+function showTab(name){
+  document.querySelectorAll('[data-panel]').forEach(p=> p.classList.toggle('hidden', p.dataset.panel!==name));
+  tabPaint(name);
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+document.getElementById('tabs').addEventListener('click', e=>{ const b=e.target.closest('.tab'); if(b) showTab(b.dataset.tab); });
+document.getElementById('styleSeg').addEventListener('click', e=>{ const b=e.target.closest('.seg'); if(b){ styleSegPaint(b.dataset.style); drawCards(b.dataset.style);} });
+document.getElementById('openSeg').addEventListener('click', e=>{ const b=e.target.closest('.seg'); if(b){ openStyle=b.dataset.open; openSegPaint(openStyle);} });
+
+// open-tab sample card + reader inline preview
+document.getElementById('openSample').innerHTML = `<div class="max-w-[360px]">${cardB(ART[0])}</div>
+  <button onclick="openReader(1)" class="mt-5 px-6 py-2.5 rounded-full bg-green text-ink text-[13px] font-bold tracking-wide hover:opacity-90">Öppna ↗</button>`;
+
+// init
+drawCards('mix'); styleSegPaint('mix'); openSegPaint('expand'); tabPaint('cards'); drawList();
+document.getElementById('readerInline').innerHTML = readerHTML(ART[2], false);
+document.querySelector('[data-panel="reader"]').insertAdjacentHTML('beforeend',
+  `<div class="mt-5"><button onclick="openReader(3)" class="px-6 py-2.5 rounded-full bg-green text-ink text-[13px] font-bold tracking-wide hover:opacity-90">Öppna i helskärm ↗</button></div>`);
+</script>
+</body>
+</html>
