@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="sv" data-theme="ink">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Debrief — The Edition</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme=ink]{
+    --bg:#14110d; --surface:#1d1913; --raise:#252019; --text:#f3efe6;
+    --muted:rgba(243,239,230,.56); --faint:rgba(243,239,230,.34); --line:rgba(243,239,230,.12);
+    --accent:#5fcf80; --ember:#e0a458; --hl:rgba(95,207,128,.24);
+  }
+  :root[data-theme=paper]{
+    --bg:#efe9dd; --surface:#fbf8f1; --raise:#fff; --text:#211e19;
+    --muted:rgba(33,30,25,.62); --faint:rgba(33,30,25,.42); --line:rgba(33,30,25,.13);
+    --accent:#2e9e57; --ember:#b0742a; --hl:rgba(46,158,87,.18);
+  }
+  *{-webkit-font-smoothing:antialiased}
+  body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;transition:background .4s,color .4s}
+  .surface{background:var(--surface)} .raise{background:var(--raise)}
+  .bdr{border-color:var(--line)}
+  .headline{font-family:Fraunces,Georgia,serif}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+  .num{font-family:'JetBrains Mono',monospace;color:var(--faint);font-weight:500}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.03em;color:var(--faint)}
+  .dek{color:var(--muted)} .faint{color:var(--faint)} .muted{color:var(--muted)} .accent{color:var(--accent)} .ember{color:var(--ember)}
+  .clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .muted-img{filter:grayscale(.32) contrast(.97) brightness(.96)}
+  .brief{transition:transform .3s cubic-bezier(.16,1,.3,1)}
+  .brief .go{opacity:0;transform:translateX(-5px);transition:all .3s}
+  .brief:hover .go{opacity:1;transform:translateX(0)}
+  .brief:hover .zoom{transform:scale(1.04)} .zoom{transition:transform .8s cubic-bezier(.16,1,.3,1)}
+  .focusring{box-shadow:0 0 0 2px var(--accent); border-radius:16px}
+  mark.hl{background:var(--hl);color:inherit;border-radius:3px;padding:0 2px;box-shadow:inset 0 -1px 0 var(--accent)}
+  .ov{transition:opacity .4s ease}
+  #reader .sheet{transition:transform .55s cubic-bezier(.16,1,.3,1)}
+  #reader.show .sheet{transform:translateY(0)}
+  #reader .sheet{transform:translateY(100%)}
+  #pal .box{transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .3s}
+  #pal.show .box{transform:translateY(0) scale(1);opacity:1}
+  #pal .box{transform:translateY(-12px) scale(.98);opacity:0}
+  .reading p{font-family:Fraunces,Georgia,serif;font-size:18.5px;line-height:1.78;color:var(--text);opacity:.92;margin-bottom:1.3em}
+  ::selection{background:var(--hl)}
+  ::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  .seg-on{background:var(--accent);color:var(--bg)}
+  .chip{border:1px solid var(--line)}
+  .kbd{font-family:'JetBrains Mono',monospace;font-size:10px;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══ -->
+<header class="sticky top-0 z-40 border-b bdr" style="background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px)">
+  <div class="max-w-[1180px] mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+    <div class="flex items-baseline gap-3">
+      <span class="headline text-[22px] tracking-tight">Debrief</span>
+      <span class="kicker hidden sm:inline">Edition №142</span>
+    </div>
+    <nav class="flex items-center gap-1 text-[13px]" id="tabs">
+      <button data-tab="edition" class="tab px-3 py-1.5 rounded-full">Edition</button>
+      <button data-tab="library" class="tab px-3 py-1.5 rounded-full">Bibliotek</button>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button onclick="openPal()" class="hidden md:flex items-center gap-2 chip rounded-full px-3 py-1.5 text-[12px] muted hover:opacity-80">Sök <span class="kbd">⌘K</span></button>
+      <button onclick="toggleTheme()" id="themeBtn" class="chip rounded-full w-9 h-9 flex items-center justify-center text-[14px] hover:opacity-80">◐</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1180px] mx-auto px-5 md:px-8">
+
+<!-- ══════════ EDITION ══════════ -->
+<section data-panel="edition">
+  <!-- masthead -->
+  <div class="pt-16 pb-10 border-b bdr">
+    <p class="kicker mb-5">Edition №142 · Torsdag 29 Maj 2026</p>
+    <h1 class="headline text-[2rem] md:text-[3.4rem] leading-[1.04] tracking-tight max-w-[16ch]">
+      EU:s AI-lag träder i kraft, Apple flyttar Siri till enheten — och en svensk startup tredubblar sin värdering.
+    </h1>
+    <div class="flex items-center gap-4 mt-7 meta">
+      <span>8 BRIEFER</span><span class="opacity-40">·</span><span>14 MIN LÄSNING</span>
+      <span class="opacity-40">·</span><span class="accent">HANDPLOCKAT</span>
+    </div>
+  </div>
+
+  <!-- editor's pick -->
+  <article class="brief cursor-pointer grid md:grid-cols-[auto_1fr_auto] gap-x-8 gap-y-5 items-start py-10 border-b bdr" data-idx="0" onclick="openReader(0)">
+    <div class="num text-[40px] md:text-[52px] leading-none pt-1">01</div>
+    <div>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="kicker">AI · Regelverk</span>
+        <span class="ember text-[10px] font-bold tracking-[0.15em] uppercase flex items-center gap-1">● Måste läsas</span>
+      </div>
+      <h2 class="headline text-[1.9rem] md:text-[2.5rem] leading-[1.06] tracking-tight mb-4 max-w-[20ch]">EU:s AI-förordning träder i kraft — det här gäller för svenska bolag</h2>
+      <p class="dek text-[16px] leading-relaxed max-w-[60ch] mb-4">Högrisksystem måste registreras och loggas, bötestaket landar på sju procent av global omsättning. Vi bryter ner exakt vad som förändras från idag.</p>
+      <p class="text-[14px] leading-relaxed max-w-[60ch] mb-5" style="color:var(--muted)"><span class="ember font-medium">Varför det spelar roll:</span> <span class="headline italic">varje bolag som rör persondata med AI berörs — inte bara de stora.</span></p>
+      <div class="meta flex items-center gap-3"><span>EUROPAKOMMISSIONEN</span><span class="opacity-40">·</span><span>4 MIN</span></div>
+    </div>
+    <div class="hidden md:block w-[180px]">
+      <div class="aspect-[3/4] rounded-xl overflow-hidden"><img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500&q=80" class="zoom w-full h-full object-cover muted-img"></div>
+    </div>
+  </article>
+
+  <!-- brief list -->
+  <div id="briefList"></div>
+
+  <!-- end state -->
+  <div class="py-24 text-center border-t bdr mt-2">
+    <div class="w-14 h-14 rounded-full mx-auto mb-6 flex items-center justify-center text-[22px]" style="background:var(--surface);color:var(--accent)">✓</div>
+    <h3 class="headline text-[1.8rem] mb-2">Du är ikapp.</h3>
+    <p class="muted text-[15px] mb-1">Det här var allt som spelade roll idag.</p>
+    <p class="meta">12 DAGAR I RAD · NÄSTA EDITION 06:00</p>
+  </div>
+</section>
+
+<!-- ══════════ LIBRARY ══════════ -->
+<section data-panel="library" class="hidden py-12">
+  <p class="kicker mb-4">Din kunskap</p>
+  <h1 class="headline text-[2.4rem] md:text-[3rem] leading-tight tracking-tight mb-2">Bibliotek</h1>
+  <p class="muted text-[15px] max-w-[55ch] mb-8">Allt du sparat, markerat och antecknat — sökbart och taggat. Det du läser blir kunskap du äger.</p>
+
+  <div class="flex items-center gap-2 mb-7">
+    <input id="libSearch" placeholder="Sök i bibliotek…" class="flex-1 max-w-[420px] surface bdr border rounded-full px-5 py-2.5 text-[14px] outline-none" style="color:var(--text)">
+    <div class="hidden md:flex gap-2 ml-2 text-[11px]">
+      <span class="chip rounded-full px-3 py-1.5 muted">#AI</span>
+      <span class="chip rounded-full px-3 py-1.5 muted">#Design</span>
+      <span class="chip rounded-full px-3 py-1.5 muted">#Startup</span>
+    </div>
+  </div>
+
+  <div class="inline-flex gap-1 surface bdr border rounded-full p-1 mb-9" id="libSeg">
+    <button data-lib="saved"  class="lseg px-4 py-1.5 rounded-full text-[13px] font-medium">Sparat</button>
+    <button data-lib="marks"  class="lseg px-4 py-1.5 rounded-full text-[13px] font-medium">Markeringar</button>
+    <button data-lib="notes"  class="lseg px-4 py-1.5 rounded-full text-[13px] font-medium">Anteckningar</button>
+  </div>
+  <div id="libBody"></div>
+</section>
+
+</main>
+
+<footer class="max-w-[1180px] mx-auto px-5 md:px-8 py-10 mt-10 border-t bdr meta flex flex-wrap gap-x-6 gap-y-2">
+  <span>DEBRIEF · THE EDITION</span><span class="opacity-40">·</span>
+  <span>TANGENTBORD: <span class="kbd">J</span>/<span class="kbd">K</span> NAVIGERA · <span class="kbd">↵</span> LÄS · <span class="kbd">B</span> SPARA · <span class="kbd">⌘K</span> SÖK</span>
+</footer>
+
+<!-- ══ READER ══ -->
+<div id="reader" class="ov fixed inset-0 z-50 opacity-0 pointer-events-none">
+  <div class="absolute inset-0" style="background:color-mix(in srgb,var(--bg) 50%, #000 50%)" onclick="closeReader()"></div>
+  <div class="sheet absolute inset-x-0 bottom-0 top-0 md:top-8 md:inset-x-[max(0px,calc(50%-440px))] rounded-t-[1.5rem] overflow-y-auto" style="background:var(--bg)">
+    <div class="sticky top-0 h-1 z-10" style="background:var(--line)"><div id="prog" class="h-full" style="width:0%;background:var(--accent)"></div></div>
+    <div id="readerBody"></div>
+  </div>
+</div>
+
+<!-- highlight toolbar -->
+<div id="hlbar" class="fixed z-[60] hidden raise bdr border rounded-xl shadow-2xl p-1 flex items-center gap-1 text-[12px]" style="box-shadow:0 12px 40px rgba(0,0,0,.4)">
+  <button onclick="doHighlight(false)" class="px-3 py-1.5 rounded-lg hover:opacity-70 flex items-center gap-1.5"><span class="accent">▟</span> Markera</button>
+  <span style="width:1px;height:18px;background:var(--line)"></span>
+  <button onclick="doHighlight(true)" class="px-3 py-1.5 rounded-lg hover:opacity-70 flex items-center gap-1.5">✎ Anteckna</button>
+</div>
+
+<!-- ══ COMMAND PALETTE ══ -->
+<div id="pal" class="ov fixed inset-0 z-[70] opacity-0 pointer-events-none">
+  <div class="absolute inset-0" style="background:rgba(0,0,0,.4)" onclick="closePal()"></div>
+  <div class="box absolute left-1/2 -translate-x-1/2 top-[14vh] w-[92%] max-w-[560px] raise bdr border rounded-2xl overflow-hidden" style="box-shadow:0 24px 70px rgba(0,0,0,.5)">
+    <input id="palInput" placeholder="Sök eller skriv ett kommando…" class="w-full px-5 py-4 text-[15px] bg-transparent outline-none border-b bdr" style="color:var(--text)">
+    <div id="palList" class="max-h-[320px] overflow-y-auto p-2"></div>
+  </div>
+</div>
+
+<script>
+// ─────── data ───────
+const BR = [
+  {tag:'Teknik · Plattform', title:'Apple flyttar Siri till en on-device-modell i höstens iOS', dek:'Lägre latens och allt stannar på enheten — ett tydligt integritetsdrag inför WWDC.', why:'on-device blir standard; molnberoende AI-assistenter får svårare att motivera sin datahunger.', src:'9TO5MAC', time:'2 MIN', must:false, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=500&q=80'},
+  {tag:'Startup · Kapital', title:'Svenska Lovable tar in 200 MSEK i runda ledd av EQT Ventures', dek:'Kapitalet går till enterprise-funktioner och USA-expansion. Värderingen tredubblas på ett år.', why:'europeisk AI-verktygsscen mognar — och svenska bolag leder, inte följer.', src:'DI DIGITAL', time:'3 MIN', must:true, img:'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=500&q=80'},
+  {tag:'Design · Verktyg', title:'Figma binder typografi till tokens direkt i canvas', dek:'Variabler styr nu storlek och radavstånd live — slutet på frikopplade textstilar.', why:'designsystem och kod närmar sig varandra; handoff-friktionen krymper.', src:'FIGMA', time:'2 MIN', must:false, img:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&q=80'},
+  {tag:'AI · Forskning', title:'Anthropic öppnar Claude för agent-arbetsflöden i molnet', dek:'Långa verktygsdrivna uppgifter kan köras utan att hålla en session öppen.', why:'agenter blir infrastruktur, inte chatt — bakgrundsjobb som tänker.', src:'ANTHROPIC', time:'2 MIN', must:false, img:''},
+  {tag:'Marknad · Index', title:'AI-bolagens andel av S&P 500 passerar 40% för första gången', dek:'Koncentrationen oroar analytiker — sju bolag står för merparten av årets uppgång.', why:'din pension är mer AI-exponerad än du tror.', src:'BLOOMBERG', time:'1 MIN', must:false, img:''},
+  {tag:'Inspiration · Essä', title:'Hur Monocle bygger ett tidlöst rutnät — en närläsning', dek:'Få kolumner, generösa marginaler, en enda accentfärg. Principerna bakom magasinets lugn.', why:'gott formspråk åldras inte; trender gör det.', src:'ESSÄ', time:'5 MIN', must:false, img:'https://images.unsplash.com/photo-1497005367839-6e852de72767?w=500&q=80'},
+  {tag:'Teknik · Infra', title:'Vercel gör Fluid Compute till standard för alla projekt', dek:'Färre kallstarter och full Node.js i middleware — utan extra konfiguration.', why:'gränsen mellan edge och server suddas ut; enklare mentala modeller vinner.', src:'VERCEL', time:'2 MIN', must:false, img:''},
+];
+const editorPick = {tag:'AI · Regelverk', title:'EU:s AI-förordning träder i kraft — det här gäller för svenska bolag', dek:'Högrisksystem måste registreras och loggas, bötestaket landar på sju procent av global omsättning.', why:'varje bolag som rör persondata med AI berörs — inte bara de stora.', src:'EUROPAKOMMISSIONEN', time:'4 MIN', must:true, img:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=700&q=80'};
+const ALL = [editorPick, ...BR]; // index 0 = pick
+
+const saved = new Set([1,2,5]);          // brief indices in BR
+const notes = [{q:'on-device blir standard', n:'Kolla om vår assistent kan köra lokalt.', src:'Apple / Siri'}];
+const seedMarks = [
+  {q:'Gott formspråk åldras inte; trender gör det.', src:'Monocle-essän'},
+  {q:'Agenter blir infrastruktur, inte chatt.', src:'Anthropic'},
+];
+
+// ─────── brief list ───────
+function briefRow(b, i){
+  const idx = i+1; // BR offset (pick is 0)
+  return `<article class="brief cursor-pointer grid grid-cols-[auto_1fr_auto] gap-x-6 items-start py-9 border-b bdr" data-idx="${idx}" onclick="openReader(${idx})">
+    <div class="num text-[22px] md:text-[28px] leading-none pt-1.5">${String(idx+1).padStart(2,'0')}</div>
+    <div class="min-w-0">
+      <div class="flex items-center gap-3 mb-2.5">
+        <span class="kicker">${b.tag}</span>
+        ${b.must?'<span class="ember text-[10px] font-bold tracking-[0.15em] uppercase">● Måste läsas</span>':''}
+      </div>
+      <h2 class="headline text-[1.45rem] md:text-[1.75rem] leading-[1.12] tracking-tight mb-2.5 max-w-[26ch]">${b.title}</h2>
+      <p class="dek text-[15px] leading-relaxed max-w-[58ch] mb-2.5 clamp-2">${b.dek}</p>
+      <p class="text-[13.5px] leading-relaxed max-w-[58ch] mb-3.5" style="color:var(--muted)"><span class="accent font-medium">Varför:</span> ${b.why}</p>
+      <div class="meta flex items-center gap-3"><span>${b.src}</span><span class="opacity-40">·</span><span>${b.time}</span>
+        <span class="go ml-2 accent">läs →</span></div>
+    </div>
+    <div class="flex flex-col items-center gap-3 pt-1">
+      <button onclick="event.stopPropagation();toggleSave(${i},this)" class="text-[16px] ${saved.has(i)?'accent':'faint'} hover:opacity-70">${saved.has(i)?'★':'☆'}</button>
+      ${b.img?`<div class="hidden md:block w-[78px] h-[78px] rounded-lg overflow-hidden"><img src="${b.img}" class="zoom w-full h-full object-cover muted-img"></div>`:''}
+    </div>
+  </article>`;
+}
+function drawBriefs(){ document.getElementById('briefList').innerHTML = BR.map((b,i)=>briefRow(b,i)).join(''); }
+function toggleSave(i,el){ if(saved.has(i)){saved.delete(i);el.textContent='☆';el.className='text-[16px] faint hover:opacity-70';} else {saved.add(i);el.textContent='★';el.className='text-[16px] accent hover:opacity-70';} }
+
+// ─────── reader ───────
+const body = `<p>Detta är en förhandsvisning av läsupplevelsen. Markera en mening med musen för att <em>highlighta</em> eller skapa en anteckning — allt landar i ditt bibliotek.</p>
+<p>Brödtexten håller en lugn radlängd och samma serif som rubriken, så att språnget från edition till artikel känns sömlöst. Ingen sidopanel, inga relaterade annonser, ingen oändlig scroll. En brief, läst klart.</p>
+<p>Tanken är enkel: du ska inte behöva googla eller skrolla X för att veta vad som hände. En redaktion väljer det som spelar roll, skriver det kort, och du äger det du läser.</p>`;
+function readerHTML(a){
+  const img = a.img || 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80';
+  return `<button onclick="closeReader()" class="sticky top-1 z-10 m-4 meta flex items-center gap-2 hover:opacity-70"><span class="text-base">←</span> EDITION</button>
+  <div class="px-6 md:px-12 pt-2 pb-24 max-w-[680px] mx-auto reading">
+    <span class="kicker">${a.tag}</span>
+    <h1 class="headline text-[2.1rem] md:text-[2.9rem] leading-[1.05] tracking-tight mt-3 mb-5" style="opacity:1">${a.title}</h1>
+    <div class="meta flex items-center gap-3 mb-7"><span>${a.src}</span><span class="opacity-40">·</span><span>${a.time}</span><span class="opacity-40">·</span><span>29 MAJ</span>
+      <button onclick="this.classList.toggle('accent')" class="ml-auto flex items-center gap-1.5 muted hover:opacity-70">★ Spara</button></div>
+    <div class="aspect-[16/9] rounded-2xl overflow-hidden mb-8"><img src="${img}" class="w-full h-full object-cover muted-img"></div>
+    <p class="headline" style="font-size:21px;opacity:.95;font-style:italic;border-left:2px solid var(--ember);padding-left:18px">${a.why}</p>
+    <div class="mt-7">${body}</div>
+    <div class="mt-12 pt-7 border-t bdr"><p class="kicker mb-4">Läs vidare</p>
+      ${ALL.filter((_,k)=>k!==ALL.indexOf(a)).slice(0,3).map(x=>`<div class="flex items-start gap-3 py-2 cursor-pointer group" onclick="openReader(${ALL.indexOf(x)})">
+        <div class="flex-1"><span class="kicker">${x.tag.split(' · ')[0]}</span><h3 class="headline text-[1.1rem] leading-snug clamp-2 group-hover:accent" style="opacity:1">${x.title}</h3></div></div>`).join('')}
+    </div>
+  </div>`;
+}
+function openReader(i){
+  const a = ALL[i]; if(!a) return;
+  document.getElementById('readerBody').innerHTML = readerHTML(a);
+  const r = document.getElementById('reader'); r.style.opacity='1'; r.style.pointerEvents='auto';
+  requestAnimationFrame(()=>r.classList.add('show'));
+  document.body.style.overflow='hidden';
+  const sheet = r.querySelector('.sheet');
+  sheet.onscroll = ()=>{ const p=sheet.scrollTop/(sheet.scrollHeight-sheet.clientHeight)*100; document.getElementById('prog').style.width=Math.min(100,p)+'%'; };
+}
+function closeReader(){ const r=document.getElementById('reader'); r.classList.remove('show'); r.style.opacity='0'; hideHl(); setTimeout(()=>{r.style.pointerEvents='none';document.body.style.overflow='';},420); }
+
+// ─────── highlight + note ───────
+let curRange=null;
+function hideHl(){ document.getElementById('hlbar').classList.add('hidden'); }
+document.addEventListener('mouseup', e=>{
+  const sel = window.getSelection();
+  const within = e.target.closest && e.target.closest('.reading');
+  if(within && sel && sel.toString().trim().length>2){
+    curRange = sel.getRangeAt(0).cloneRange();
+    const r = curRange.getBoundingClientRect();
+    const bar = document.getElementById('hlbar');
+    bar.classList.remove('hidden');
+    bar.style.left = Math.max(10, r.left + r.width/2 - bar.offsetWidth/2)+'px';
+    bar.style.top = (r.top - 46)+'px';
+  } else if(!e.target.closest('#hlbar')) hideHl();
+});
+function doHighlight(withNote){
+  if(!curRange) return;
+  const text = curRange.toString();
+  const mark = document.createElement('mark'); mark.className='hl';
+  try{ curRange.surroundContents(mark); }catch(_){ mark.appendChild(curRange.extractContents()); curRange.insertNode(mark); }
+  window.getSelection().removeAllRanges(); hideHl();
+  if(withNote){
+    const n = prompt('Anteckning för: "'+text.slice(0,60)+'…"');
+    if(n) notes.unshift({q:text, n:n, src:'Denna brief'});
+  } else {
+    seedMarks.unshift({q:text, src:'Denna brief'});
+  }
+  flashLib();
+}
+function flashLib(){ const t=document.querySelector('[data-tab=library]'); t.classList.add('accent'); setTimeout(()=>t.classList.remove('accent'),700); }
+
+// ─────── library ───────
+function drawLib(which){
+  let html='';
+  if(which==='saved'){
+    const items=[...saved].map(i=>BR[i]);
+    html = items.length? items.map(b=>`<div class="brief cursor-pointer flex items-center gap-4 py-4 border-b bdr" onclick="openReader(${BR.indexOf(b)+1})">
+        ${b.img?`<div class="w-14 h-14 rounded-lg overflow-hidden shrink-0"><img src="${b.img}" class="w-full h-full object-cover muted-img"></div>`:'<div class="w-14 h-14 rounded-lg shrink-0 surface flex items-center justify-center accent">★</div>'}
+        <div class="flex-1 min-w-0"><span class="kicker">${b.tag.split(' · ')[0]}</span><h3 class="headline text-[1.15rem] leading-snug clamp-2" style="opacity:1">${b.title}</h3></div>
+        <span class="meta shrink-0">${b.time}</span></div>`).join('') : '<p class="muted py-8">Inget sparat ännu.</p>';
+  } else if(which==='marks'){
+    html = `<div class="columns-1 md:columns-2 gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">${seedMarks.map(m=>`
+      <div class="surface bdr border rounded-2xl p-5"><div class="text-[3rem] headline leading-none accent" style="height:24px;overflow:hidden">“</div>
+        <p class="headline text-[1.15rem] leading-snug mb-3" style="opacity:.95">${m.q}</p>
+        <p class="meta">${(m.src||'').toUpperCase()}</p></div>`).join('')}</div>`;
+  } else {
+    html = notes.length? notes.map(n=>`<div class="surface bdr border rounded-2xl p-5 mb-4">
+        <p class="muted text-[13px] mb-2 border-l-2 pl-3" style="border-color:var(--accent)">${n.q}</p>
+        <p class="text-[15px] leading-relaxed" style="color:var(--text)">${n.n}</p>
+        <p class="meta mt-3">${(n.src||'').toUpperCase()}</p></div>`).join('') : '<p class="muted py-8">Inga anteckningar ännu.</p>';
+  }
+  document.getElementById('libBody').innerHTML = html;
+}
+function libPaint(sel){ document.querySelectorAll('#libSeg .lseg').forEach(b=>{ const on=b.dataset.lib===sel; b.className=`lseg px-4 py-1.5 rounded-full text-[13px] font-medium ${on?'seg-on':'muted hover:opacity-80'}`; }); }
+
+// ─────── command palette ───────
+const PAL=[
+  {label:'Gå till Edition', act:()=>showTab('edition')},
+  {label:'Gå till Bibliotek', act:()=>showTab('library')},
+  {label:'Växla tema (Ink / Paper)', act:toggleTheme},
+  {label:'Öppna redaktörens val', act:()=>openReader(0)},
+  {label:'Sök: "AI"', act:()=>{showTab('library');}},
+];
+function drawPal(q=''){
+  const items = PAL.filter(p=>p.label.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('palList').innerHTML = items.map((p,i)=>`<button class="palItem w-full text-left px-3 py-2.5 rounded-lg text-[14px] ${i===0?'raise':''}" style="${i===0?'background:var(--surface)':''}" onclick='runPal(${PAL.indexOf(p)})'>${p.label}</button>`).join('') || '<p class="muted px-3 py-3 text-[13px]">Inga träffar</p>';
+}
+function runPal(i){ closePal(); PAL[i].act(); }
+function openPal(){ const p=document.getElementById('pal'); p.style.opacity='1'; p.style.pointerEvents='auto'; p.classList.add('show'); drawPal(''); const inp=document.getElementById('palInput'); inp.value=''; setTimeout(()=>inp.focus(),60); }
+function closePal(){ const p=document.getElementById('pal'); p.classList.remove('show'); p.style.opacity='0'; p.style.pointerEvents='none'; }
+document.getElementById('palInput').addEventListener('input', e=>drawPal(e.target.value));
+
+// ─────── theme + tabs ───────
+function toggleTheme(){ const r=document.documentElement; r.dataset.theme = r.dataset.theme==='ink'?'paper':'ink'; }
+function tabPaint(sel){ document.querySelectorAll('#tabs .tab').forEach(b=>{ const on=b.dataset.tab===sel; b.className=`tab px-3 py-1.5 rounded-full ${on?'raise':'muted hover:opacity-80'}`; b.style.background= on?'var(--surface)':''; }); }
+function showTab(name){ document.querySelectorAll('[data-panel]').forEach(p=>p.classList.toggle('hidden',p.dataset.panel!==name)); tabPaint(name); window.scrollTo({top:0}); }
+document.getElementById('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab'); if(b)showTab(b.dataset.tab);});
+document.getElementById('libSeg').addEventListener('click',e=>{const b=e.target.closest('.lseg'); if(b){libPaint(b.dataset.lib);drawLib(b.dataset.lib);}});
+
+// ─────── keyboard ───────
+let focusIdx=-1;
+function setFocus(n){
+  const els=[...document.querySelectorAll('#briefList .brief, [data-panel=edition] > .brief')];
+  const cards=[document.querySelector('[data-idx="0"]'), ...document.querySelectorAll('#briefList .brief')];
+  cards.forEach(c=>c&&c.classList.remove('focusring'));
+  focusIdx=Math.max(0,Math.min(cards.length-1,n));
+  const c=cards[focusIdx]; if(c){c.classList.add('focusring'); c.scrollIntoView({block:'center',behavior:'smooth'});}
+}
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openPal(); return; }
+  if(e.key==='Escape'){ closePal(); closeReader(); return; }
+  if(document.getElementById('pal').classList.contains('show')) return;
+  if(document.activeElement.tagName==='INPUT') return;
+  const editionVisible = !document.querySelector('[data-panel=edition]').classList.contains('hidden');
+  if(!editionVisible) return;
+  if(e.key==='j'){ setFocus(focusIdx+1); }
+  else if(e.key==='k'){ setFocus(focusIdx-1); }
+  else if(e.key==='Enter' && focusIdx>=0){ openReader(focusIdx); }
+  else if(e.key.toLowerCase()==='b' && focusIdx>0){ const i=focusIdx-1; const btn=document.querySelector(`#briefList .brief[data-idx="${focusIdx}"] button`); if(btn) toggleSave(i,btn); }
+});
+
+// init
+drawBriefs(); tabPaint('edition'); libPaint('saved'); drawLib('saved');
+</script>
+</body>
+</html>
