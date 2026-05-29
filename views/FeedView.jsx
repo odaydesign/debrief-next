@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FadeInCard, CardContent, LeadCard, SideCard, MagazineCard, GridCard } from "@/components/FeedMasonryComponents";
+import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
 import { Layers, ArrowLeft } from 'lucide-react';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
@@ -23,13 +23,25 @@ const generateWeekStacks = (baseDate, articles) => {
   return stacks;
 };
 
-// ─── Magazine day layout — used for both "today" section and opened stacks ───
-const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
-  const lead     = articles[0];
-  const sidebar  = articles.slice(1, 3);
-  const mid      = articles.slice(3, 6);
-  const rest     = articles.slice(6);
+// ─── Reusable card grid — masonry of rich cards (matches Search / Archive) ───
+const DayGrid = ({ articles, onArticleClick }) => (
+  <div className="w-full flex justify-center px-4 pb-16">
+    <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px]">
+      <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
+        {articles.map((a, i) => (
+          <FadeInCard key={a._id || a.id || i} index={i} onClick={() => onArticleClick(a)}>
+            <div className="pointer-events-none h-full w-full">
+              <CardContent data={a} />
+            </div>
+          </FadeInCard>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
+// ─── Day layout — header + card grid, used for opened stacks ───
+const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
   const tags = [...new Set(articles.map(a => a.tag || a.category).filter(Boolean))];
 
   const dateLabel = date.toLocaleDateString('sv-SE', {
@@ -37,26 +49,26 @@ const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
   });
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] text-[#0A0A0A]">
+    <div className="min-h-screen bg-[#46423f] text-[#f6f4f1]">
 
       {/* ── Header ───────────────────────────────────────────────── */}
-      <header className="px-5 md:px-10 pt-8 pb-5">
+      <header className="px-5 md:px-10 pt-8 pb-6">
         {onClose && (
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-[#888] hover:text-[#0A0A0A] transition-colors mb-6 group"
+            className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-white/50 hover:text-[#f6f4f1] transition-colors mb-6 group"
           >
             <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
             Tillbaka
           </button>
         )}
 
-        <div className="max-w-[1200px] mx-auto">
+        <div className="max-w-[1068px] mx-auto">
           <div className="flex items-end justify-between gap-4 mb-3">
-            <h1 className="font-editorial italic text-[2.5rem] md:text-[3.75rem] leading-none tracking-tight capitalize">
+            <h1 className="font-serif text-[2.5rem] md:text-[3.75rem] leading-none tracking-tight capitalize text-[#f6f4f1]">
               {dateLabel}
             </h1>
-            <span className="text-[12px] text-[#999] shrink-0 hidden md:block pb-1">
+            <span className="text-[12px] text-white/40 shrink-0 hidden md:block pb-1">
               {articles.length} artiklar
             </span>
           </div>
@@ -65,84 +77,24 @@ const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-x-4 gap-y-1 mb-1">
               {tags.map(tag => (
-                <span key={tag} className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#E03E2D]">
+                <span key={tag} className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#50c878]">
                   {tag}
                 </span>
               ))}
             </div>
           )}
 
-          <div className="h-px bg-[#0A0A0A] mt-4" />
+          <div className="h-px bg-white/15 mt-4" />
         </div>
       </header>
 
       {articles.length === 0 ? (
-        <div className="px-5 py-20 text-center text-[#888]">
+        <div className="px-5 py-20 text-center text-white/40">
           Inga artiklar publicerade denna dag.
         </div>
       ) : (
-        <main className="px-5 md:px-10 pb-20">
-          <div className="max-w-[1200px] mx-auto space-y-6">
-
-            {/* Row 1: Lead (8 col) + sidebar (4 col) */}
-            {lead && (
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-7">
-                <div className="md:col-span-8">
-                  <FadeInCard index={0} onClick={() => {}}>
-                    <LeadCard data={lead} onClick={onArticleClick} />
-                  </FadeInCard>
-                </div>
-                {sidebar.length > 0 && (
-                  <div className="md:col-span-4 flex flex-col gap-0 md:pl-6 md:border-l md:border-[#E8E6E1]">
-                    {sidebar.map((a, i) => (
-                      <div key={a._id || a.id || i}>
-                        <FadeInCard index={i + 1} onClick={() => {}}>
-                          <SideCard data={a} onClick={onArticleClick} />
-                        </FadeInCard>
-                        {i < sidebar.length - 1 && (
-                          <div className="border-b border-[#E8E6E1] my-4" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Row 2: 4-col magazine grid */}
-            {mid.length > 0 && (
-              <>
-                <div className="flex items-center gap-4 pt-1">
-                  <div className="flex-1 h-px bg-[#E8E6E1]" />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
-                  {mid.map((a, i) => (
-                    <FadeInCard key={a._id || a.id || i} index={i + 3} onClick={() => {}}>
-                      <MagazineCard data={a} onClick={onArticleClick} />
-                    </FadeInCard>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Row 3: remaining articles */}
-            {rest.length > 0 && (
-              <>
-                <div className="flex items-center gap-4 pt-1">
-                  <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#999] shrink-0">Fler</span>
-                  <div className="flex-1 h-px bg-[#E8E6E1]" />
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-5 md:gap-7">
-                  {rest.map((a, i) => (
-                    <FadeInCard key={a._id || a.id || i} index={i} onClick={() => {}}>
-                      <GridCard data={a} onClick={onArticleClick} />
-                    </FadeInCard>
-                  ))}
-                </div>
-              </>
-            )}
-
-          </div>
+        <main className="pt-4">
+          <DayGrid articles={articles} onArticleClick={onArticleClick} />
         </main>
       )}
     </div>
@@ -283,11 +235,11 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
           >
             <div className="pb-32">
 
-              {/* Today — magazine spread inline ─────────────────────────── */}
+              {/* Today — card grid inline ───────────────────────────────── */}
               {weekStacks.length > 0 && (
-                <div className="border-b border-white/10">
-                  {/* Dark masthead over the white spread */}
-                  <div className="bg-gradient-to-b from-black/30 to-transparent px-5 md:px-10 pt-14 pb-8 text-center">
+                <div className="border-b border-white/10 pb-12">
+                  {/* Dark masthead */}
+                  <div className="bg-gradient-to-b from-black/30 to-transparent px-5 md:px-10 pt-14 pb-10 text-center">
                     <p className="text-[11px] font-bold text-[#50c878] uppercase tracking-[0.25em] mb-3 font-sans">
                       Dagens Översikt
                     </p>
@@ -296,14 +248,13 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
                     </h1>
                   </div>
 
-                  {/* Light magazine spread */}
-                  <div className="rounded-t-3xl overflow-hidden shadow-2xl shadow-black/40 mx-2 md:mx-6">
-                    <DayMagazineLayout
-                      articles={weekStacks[0].articles}
-                      onArticleClick={setActiveArticle}
-                      date={weekStacks[0].date}
-                    />
-                  </div>
+                  {weekStacks[0].articles.length === 0 ? (
+                    <div className="px-5 py-16 text-center text-white/40">
+                      Inga artiklar publicerade idag.
+                    </div>
+                  ) : (
+                    <DayGrid articles={weekStacks[0].articles} onArticleClick={setActiveArticle} />
+                  )}
                 </div>
               )}
 
