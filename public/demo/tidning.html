@@ -131,23 +131,6 @@
   .reading p.lead{font-size:19px;line-height:1.5;font-weight:500;}
   mark.hl{background:var(--accent-soft);border-bottom:1.5px solid var(--accent);padding:.04em .1em;}
 
-  /* reader progress */
-  #rdprog{position:absolute;left:0;bottom:0;height:2px;background:var(--accent);width:0;transition:width .1s linear;}
-
-  /* sections */
-  .sec{display:flex;align-items:center;gap:11px;margin:32px 0 2px;}
-  .sec-l{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);}
-  .sec-rule{flex:1;height:1px;background:var(--line-strong);}
-  .sec-c{flex:none;}
-  .head.xl{font-size:28px;line-height:1.06;}
-
-  /* related */
-  .rel{margin-top:32px;border-top:2px solid var(--ink);padding-top:4px;}
-  .rel-h{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);padding:12px 0 4px;}
-  .rel-row{display:flex;gap:11px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer;}
-  .rel-row:active{opacity:.55;}
-  .rel-t{flex:1;font-family:'Archivo',sans-serif;font-weight:600;font-size:15.5px;line-height:1.2;letter-spacing:-.012em;}
-
   /* toast */
   #toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);
     z-index:70;background:var(--ink);color:var(--bg);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;
@@ -185,7 +168,7 @@ const TYPES = {
   link:{tag:'Länk',verb:'Öppna ↗'}, quote:{tag:'Citat',verb:'Läs →'}, stat:{tag:'Siffra',verb:'Kontext →'},
 };
 const D = [
- {id:'a0',type:'article',img:IMG.ai,kicker:'AI · Marknad',source:'The Information',time:'5 min',must:true,lead:true,
+ {id:'a0',type:'article',img:IMG.ai,kicker:'AI · Marknad',source:'The Information',time:'5 min',must:true,
   head:'OpenAI:s nya modell flyttar tyngdpunkten från chatt till agenter',
   dek:'Skiftet är inte en produktuppdatering — det är en omformulering av vem som gör jobbet.',
   why:'Mätetalet byts från "svar per fråga" till "uppgifter slutförda" — det förändrar prissättning och bemanning.',
@@ -258,9 +241,9 @@ function card(inner,a){return `<article class="card rv" onclick="openRd('${a.id}
 /* ---------------- per-type cards ---------------- */
 const C = {};
 C.article = (a,i)=>card(topline(a,i)+
-  `<h2 class="head ${a.lead?'xl':(a.must?'lg':'')}">${a.head}</h2>`+
-  (a.img?`<div class="photo" style="aspect-ratio:${a.lead?'3/2':'16/9'};"><img src="${a.img}"></div>${a.lead?`<div class="cap">Foto · ${a.source}</div>`:''}`:'')+
-  `<p class="dek ${a.lead?'clamp3':'clamp2'}">${a.dek}</p>`+(a.must?why(a):'')+foot(a),a);
+  `<h2 class="head ${a.must?'lg':''}">${a.head}</h2>`+
+  (a.img?`<div class="photo" style="aspect-ratio:16/9;"><img src="${a.img}"></div>`:'')+
+  `<p class="dek clamp2">${a.dek}</p>`+(a.must?why(a):'')+foot(a),a);
 C.textonly = (a,i)=>card(topline(a,i)+
   `<h2 class="head">${a.head}</h2><p class="dek clamp2">${a.dek}</p>`+why(a)+foot(a),a);
 C.video = (a,i)=>card(topline(a,i)+
@@ -296,23 +279,9 @@ C.stat = (a,i)=>card(topline(a,i)+
    <div style="flex:1;"><div class="meta" style="margin-bottom:4px;">${a.unit}</div><h2 class="head sm" style="font-weight:600;">${a.head}</h2></div></div>`+
   why(a)+foot(a),a);
 
-/* ---------------- sections ---------------- */
-const SECTIONS = [
-  {label:'Dagens ledare', ids:['a0']},
-  {label:'Marknad & makro', ids:['a1','a8']},
-  {label:'Lyssna & se', ids:['a2','a3']},
-  {label:'Läslista & resurser', ids:['a4','a5','a6']},
-  {label:'Veckans ord', ids:['a7']},
-];
-
 /* ---------------- render feed ---------------- */
 function draw(){
-  let n=0, html='';
-  SECTIONS.forEach((sec,si)=>{
-    if(si>0) html+=`<div class="sec"><span class="sec-l">${sec.label}</span><span class="sec-rule"></span><span class="num sec-c">§${si+1}</span></div>`;
-    sec.ids.forEach(id=>{const a=byId(id); if(!a)return; html+=C[a.type](a,n); n++;});
-  });
-  document.getElementById('feed').innerHTML = html;
+  document.getElementById('feed').innerHTML = D.map((a,i)=>C[a.type](a,i)).join('');
   document.getElementById('end').innerHTML =
     `<div style="text-align:center;padding:40px 0 10px;border-top:2px solid var(--ink);margin-top:18px;">
        <div class="grotesk" style="font-weight:700;font-size:20px;">Du är ikapp.</div>
@@ -345,24 +314,14 @@ function openRd(id){
 function closeRd(){document.getElementById('rd').classList.remove('open');document.body.style.overflow='';}
 function bar(a){return `<div class="rdbar"><button class="x" onclick="closeRd()">✕ Stäng</button>
   <span class="meta" style="margin-left:auto;">${a.source} · ${a.time}</span>
-  <button class="save ${saved.has(a.id)?'on':''}" data-save="${a.id}" onclick="tog('${a.id}',event)"><span class="ic">${saved.has(a.id)?'★':'☆'}</span></button>
-  <div id="rdprog"></div></div>`;}
+  <button class="save ${saved.has(a.id)?'on':''}" data-save="${a.id}" onclick="tog('${a.id}',event)"><span class="ic">${saved.has(a.id)?'★':'☆'}</span></button></div>`;}
 function rdWhy(a){return `<div class="why" style="margin:0 0 24px;"><div class="lbl">Varför det spelar roll</div><p style="font-size:15px;">${a.why}</p></div>`;}
-function related(a){
-  const items=D.filter(x=>x.id!==a.id && x.type!=='quote' && x.type!=='stat').slice(0,3);
-  if(!items.length) return '';
-  return `<div class="rel"><div class="rel-h">Mer som detta</div>`+
-    items.map(x=>`<div class="rel-row" onclick="openRd('${x.id}')">
-      <span class="kicker" style="flex:none;width:64px;">${TYPES[x.type].tag}</span>
-      <span class="rel-t">${x.head}</span>
-      <span class="num" style="flex:none;font-size:11px;">${x.time}</span></div>`).join('')+`</div>`;
-}
 
 const RD={};
 RD.article = a=>bar(a)+`<div class="rdwrap"><div class="topline"><span class="kicker">${a.kicker}</span><span class="tag">${TYPES[a.type].tag}</span></div>
   <h1 class="head lg" style="font-size:28px;line-height:1.08;margin:8px 0 16px;">${a.head}</h1>
   ${a.img?`<div class="photo" style="aspect-ratio:16/9;margin-bottom:4px;"><img src="${a.img}"></div><div class="cap">Foto · ${a.source}</div>`:''}
-  ${rdWhy(a)}<div class="reading">${(a.body||[]).map(p=>`<p class="${p.lead?'lead':''}">${p.t}</p>`).join('')}</div>${related(a)}</div>`;
+  ${rdWhy(a)}<div class="reading">${(a.body||[]).map(p=>`<p class="${p.lead?'lead':''}">${p.t}</p>`).join('')}</div></div>`;
 RD.textonly = RD.article;
 
 RD.video = a=>bar(a)+`<div class="rdwrap" style="padding-top:18px;">
@@ -426,7 +385,6 @@ RD.stat = a=>bar(a)+`<div class="rdwrap" style="text-align:center;padding-top:40
 
 /* highlight in reader */
 document.getElementById('sheet').addEventListener('mouseup',()=>{const s=window.getSelection();if(s.toString().trim().length>4&&s.rangeCount){try{const r=s.getRangeAt(0),m=document.createElement('mark');m.className='hl';r.surroundContents(m);s.removeAllRanges();toast('Markerat ✎');}catch(e){}}});
-document.getElementById('sheet').addEventListener('scroll',function(){const p=document.getElementById('rdprog');if(!p)return;const max=this.scrollHeight-this.clientHeight;p.style.width=(max>0?Math.min(100,this.scrollTop/max*100):0)+'%';},{passive:true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRd();});
 
 draw();
