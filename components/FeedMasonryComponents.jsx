@@ -150,8 +150,6 @@ export const CardContent = ({ data, featured = false }) => {
                     {data.isMustRead && <span className="meta text-accent">Måste läsas</span>}
                 </div>
 
-                {renderMedia()}
-
                 {isPlainTweet ? (
                     <p className="font-serif text-lg leading-snug">
                         {description || data.content?.replace(/<[^>]*>?/gm, '')}
@@ -167,8 +165,8 @@ export const CardContent = ({ data, featured = false }) => {
                     </>
                 )}
 
-                {/* footer */}
-                <div className="mt-auto pt-3 flex items-center gap-2.5 border-t border-line">
+                {/* data + actions — above the image */}
+                <div className="mt-3 pt-3 mb-3 flex items-center gap-2.5 border-t border-line">
                     <span className="meta flex-1 min-w-0 truncate">
                         {source}{dateStr ? ` · ${dateStr}` : ''}
                     </span>
@@ -184,6 +182,9 @@ export const CardContent = ({ data, featured = false }) => {
                         </button>
                     )}
                 </div>
+
+                {/* image — anchored at the bottom */}
+                {renderMedia()}
             </div>
         </article>
     );
