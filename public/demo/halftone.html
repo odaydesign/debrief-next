@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#26231f">
+<title>Debrief — Halftone Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#26231f; --card:#322e29; --ink:#f3efe6; --dek:rgba(243,239,230,.66);
+    --muted:rgba(243,239,230,.5); --line:rgba(243,239,230,.14); --line-strong:rgba(243,239,230,.26);
+    --accent:#50c878; --accent-ink:#11241a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;padding:26px 16px 120px;}
+  .kicker{font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;font-weight:600;color:var(--accent);}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;}
+  .serif{font-family:'Fraunces',Georgia,serif;letter-spacing:-.01em;}
+  h1.title{font-family:'Fraunces',serif;font-weight:600;font-size:2rem;line-height:1.08;margin:6px 0 4px;}
+  .sub{color:var(--dek);font-size:14px;line-height:1.55;margin:0 0 20px;}
+
+  /* controls */
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);}
+  .controls label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;}
+  .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;}
+  .seg button{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 11px;background:transparent;color:var(--muted);border:0;cursor:pointer;}
+  .seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600;}
+  input[type=range]{accent-color:var(--accent);}
+
+  /* card */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:18px;
+    transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
+  @media(hover:hover){.card:hover{border-color:var(--line-strong);box-shadow:0 18px 50px -24px rgba(0,0,0,.6);}}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink);}
+  .chip i{width:6px;height:6px;border-radius:99px;background:var(--accent);display:inline-block;}
+  .halftone{position:relative;width:100%;aspect-ratio:16/10;background:var(--card);cursor:crosshair;touch-action:pan-y;}
+  .halftone canvas{display:block;width:100%;height:100%;}
+  .hint{position:absolute;left:10px;bottom:10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,.35);backdrop-filter:blur(4px);padding:3px 8px;border-radius:6px;pointer-events:none;opacity:.85;}
+  .pad{padding:15px 16px 16px;}
+  .pad h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.32rem;line-height:1.16;margin:0 0 6px;letter-spacing:-.01em;}
+  .pad p{color:var(--dek);font-size:14px;line-height:1.5;margin:0;}
+  .foot{display:flex;align-items:center;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
+  .foot .src{flex:1;min-width:0;}
+  .topline{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">Engine · Canvas 2D</p>
+  <h1 class="title">Halftone dots</h1>
+  <p class="sub">Each card image is sampled into ~4,000 dots on a single canvas. Hover (or tap on mobile) to send a radial wave through the field — the dots implode and explode outward from your cursor.</p>
+
+  <div class="controls">
+    <label>Färg
+      <span class="seg" id="seg-color">
+        <button data-color="1" class="on">Sampled</button>
+        <button data-color="0">Newsprint</button>
+      </span>
+    </label>
+    <label>Täthet
+      <input type="range" id="density" min="2200" max="6500" step="300" value="4000">
+      <span class="meta" id="density-val">4000</span>
+    </label>
+  </div>
+
+  <div id="feed"></div>
+</div>
+
+<script>
+/* ============================================================
+   Halftone engine — samples an <img> into a dot field on a
+   single canvas, with a radial implode/explode wave on hover.
+   ============================================================ */
+class Halftone {
+  constructor(host, src, opts = {}) {
+    this.host = host;
+    this.src = src;
+    this.opts = Object.assign({ target: 4000, color: true, maxR: 0.62, gamma: 1.0 }, opts);
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    host.appendChild(this.canvas);
+    this.dots = [];
+    this.cx = 0; this.cy = 0;           // wave center
+    this.env = 0;                        // envelope 0..1 (hover strength)
+    this.target = 0;                     // env target
+    this.t = 0;                          // wave phase clock
+    this.raf = 0;
+    this.last = 0;
+    this.ready = false;
+    this.inkRGB = [243, 239, 230];
+
+    this._onEnter = (e) => this._activate(e);
+    this._onMove  = (e) => this._move(e);
+    this._onLeave = () => { this.target = 0; this._ensureRAF(); };
+    this._onDown  = (e) => { this._activate(e); this.t = 0; };
+
+    host.addEventListener('pointerenter', this._onEnter);
+    host.addEventListener('pointermove', this._onMove);
+    host.addEventListener('pointerleave', this._onLeave);
+    host.addEventListener('pointerdown', this._onDown);
+
+    this._load();
+    this._ro = new ResizeObserver(() => this._resize());
+    this._ro.observe(host);
+
+    // Pause work when the card scrolls out of view.
+    this._io = new IntersectionObserver((es) => {
+      this.visible = es[0].isIntersecting;
+      if (!this.visible && this.raf) { cancelAnimationFrame(this.raf); this.raf = 0; }
+    }, { threshold: 0.01 });
+    this._io.observe(host);
+    this.visible = true;
+  }
+
+  setColor(on) { this.opts.color = on; if (this.ready) { this.build(); this.drawRest(); } }
+  setTarget(n) { this.opts.target = n; if (this.ready) { this.build(); this.drawRest(); } }
+
+  _load() {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+    img.onload = () => { this.img = img; this.ready = true; this._resize(); };
+    img.onerror = () => { this.ready = false; };
+    img.src = this.src;
+  }
+
+  _resize() {
+    if (!this.ready) return;
+    const r = this.host.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.W = r.width; this.H = r.height;
+    this.canvas.width = Math.round(this.W * this.dpr);
+    this.canvas.height = Math.round(this.H * this.dpr);
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.build();
+    this.drawRest();
+  }
+
+  /* Sample the image into a grid of dots sized by darkness. */
+  build() {
+    const aspect = this.W / this.H;
+    const cols = Math.max(8, Math.round(Math.sqrt(this.opts.target * aspect)));
+    const rows = Math.max(8, Math.round(this.opts.target / cols));
+    this.cols = cols; this.rows = rows;
+    const cw = this.W / cols, ch = this.H / rows;
+    this.cell = Math.min(cw, ch);
+
+    // Draw the image into a tiny offscreen canvas at grid resolution.
+    const off = document.createElement('canvas');
+    off.width = cols; off.height = rows;
+    const octx = off.getContext('2d', { willReadFrequently: true });
+    // cover-fit the source image into cols×rows
+    const iw = this.img.width, ih = this.img.height;
+    const s = Math.max(cols / iw, rows / ih);
+    const dw = iw * s, dh = ih * s;
+    octx.drawImage(this.img, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
+
+    let data;
+    try { data = octx.getImageData(0, 0, cols, rows).data; }
+    catch (e) { this.tainted = true; return; }  // CORS-tainted → fall back to plain <img>
+
+    const dots = [];
+    const maxR = this.cell * this.opts.maxR;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+        if (a < 8) continue;
+        // luminance 0..1
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        // darker → bigger dot (classic halftone). gamma shapes the curve.
+        let rad = Math.pow(1 - lum, this.opts.gamma) * maxR;
+        rad = Math.max(0, rad);
+        if (rad < 0.25) continue;
+        dots.push({
+          x: x * cw + cw / 2,
+          y: y * ch + ch / 2,
+          r: rad,
+          cr: r, cg: g, cb: b,
+        });
+      }
+    }
+    this.dots = dots;
+  }
+
+  drawRest() {
+    if (this.tainted) { this._drawPlain(); return; }
+    this._draw(0);
+  }
+
+  _drawPlain() {
+    // CORS fallback: just paint the image.
+    this.ctx.clearRect(0, 0, this.W, this.H);
+    const iw = this.img.width, ih = this.img.height;
+    const s = Math.max(this.W / iw, this.H / ih);
+    const dw = iw * s, dh = ih * s;
+    this.ctx.drawImage(this.img, (this.W - dw) / 2, (this.H - dh) / 2, dw, dh);
+  }
+
+  _activate(e) {
+    const r = this.host.getBoundingClientRect();
+    this.cx = (e.clientX - r.left);
+    this.cy = (e.clientY - r.top);
+    this.target = 1;
+    this._ensureRAF();
+  }
+  _move(e) {
+    const r = this.host.getBoundingClientRect();
+    this.cx = (e.clientX - r.left);
+    this.cy = (e.clientY - r.top);
+    if (this.target === 1) this._ensureRAF();
+  }
+
+  _ensureRAF() {
+    if (this.raf || !this.visible) return;
+    this.last = performance.now();
+    this.raf = requestAnimationFrame((n) => this._frame(n));
+  }
+
+  _frame(now) {
+    const dt = Math.min(50, now - this.last) / 1000;
+    this.last = now;
+    // ease envelope toward target; advance wave clock while energized
+    this.env += (this.target - this.env) * Math.min(1, dt * 6);
+    this.t += dt * (3.2 + 6.5 * this.env);   // wave travels outward over time
+
+    this._draw(this.env);
+
+    // keep animating while there's energy; otherwise settle to rest and stop
+    if (this.env > 0.01 || this.target > 0) {
+      this.raf = requestAnimationFrame((n) => this._frame(n));
+    } else {
+      this.raf = 0;
+      this.env = 0;
+      this._draw(0);
+    }
+  }
+
+  /* Render the dot field. env=0 → rest; env>0 → radial wave around (cx,cy). */
+  _draw(env) {
+    if (this.tainted) return;
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+
+    const K = 0.045;        // spatial frequency of the wave (rings)
+    const AMP = this.cell * 2.6;   // max radial displacement
+    const SPREAD = 1 / (Math.max(this.W, this.H) * 0.55); // distance falloff
+    const cx = this.cx, cy = this.cy, t = this.t;
+    const color = this.opts.color;
+
+    if (!color) {
+      // monochrome newsprint — batch every dot into one path for speed
+      ctx.fillStyle = `rgb(${this.inkRGB[0]},${this.inkRGB[1]},${this.inkRGB[2]})`;
+      ctx.beginPath();
+    }
+
+    for (let k = 0; k < this.dots.length; k++) {
+      const d = this.dots[k];
+      let px = d.x, py = d.y, pr = d.r;
+
+      if (env > 0.001) {
+        const dx = d.x - cx, dy = d.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
+        const wave = Math.sin(dist * K - t * 6.0);
+        const fall = Math.exp(-dist * SPREAD) * env;
+        const off = AMP * wave * fall;
+        const ux = dx / dist, uy = dy / dist;
+        px = d.x + ux * off;
+        py = d.y + uy * off;
+        pr = d.r * (1 + 0.55 * wave * fall);
+        if (pr < 0) pr = 0;
+      }
+
+      if (color) {
+        ctx.fillStyle = `rgb(${d.cr},${d.cg},${d.cb})`;
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, 6.2832);
+        ctx.fill();
+      } else {
+        ctx.moveTo(px + pr, py);
+        ctx.arc(px, py, pr, 0, 6.2832);
+      }
+    }
+
+    if (!color) ctx.fill();
+  }
+
+  destroy() {
+    cancelAnimationFrame(this.raf);
+    this._ro.disconnect(); this._io.disconnect();
+    this.host.removeEventListener('pointerenter', this._onEnter);
+    this.host.removeEventListener('pointermove', this._onMove);
+    this.host.removeEventListener('pointerleave', this._onLeave);
+    this.host.removeEventListener('pointerdown', this._onDown);
+  }
+}
+
+/* ============================================================
+   Demo cards
+   ============================================================ */
+const CARDS = [
+  { tag:'AI · Marknad', src:'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1000&q=80',
+    head:'OpenAI:s nya modell flyttar tyngdpunkten till agenter',
+    dek:'Skiftet är inte en produktuppdatering — det är en omformulering av vem som gör jobbet.', source:'The Information · 5 min' },
+  { tag:'Teknik', src:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1000&q=80',
+    head:'Varför halvledar-kartan ritas om — och vad det betyder',
+    dek:'Hur exportkontroller, kapacitet och efterfrågan möts under 2026.', source:'Stratechery · 18 min' },
+  { tag:'Design', src:'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1000&q=80',
+    head:'Brutalism möter minimalism i 2026 års gränssnitt',
+    dek:'En generation designers som växte upp med appar ritar nu om reglerna.', source:'It\'s Nice That · 6 min' },
+];
+
+const engines = [];
+function render() {
+  const feed = document.getElementById('feed');
+  feed.innerHTML = CARDS.map((c, i) => `
+    <article class="card">
+      <div class="halftone" id="ht-${i}">
+        <div class="hint">Hover →</div>
+      </div>
+      <div class="pad">
+        <div class="topline"><span class="chip"><i></i>${c.tag}</span></div>
+        <h2>${c.head}</h2>
+        <p>${c.dek}</p>
+        <div class="foot"><span class="src meta">${c.source}</span><span class="meta" style="color:var(--accent);">Läs →</span></div>
+      </div>
+    </article>`).join('');
+
+  CARDS.forEach((c, i) => {
+    const host = document.getElementById('ht-' + i);
+    engines.push(new Halftone(host, c.src, { target: 4000, color: true }));
+  });
+}
+render();
+
+/* controls */
+document.getElementById('seg-color').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#seg-color button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  const on = b.dataset.color === '1';
+  engines.forEach(en => en.setColor(on));
+});
+const dens = document.getElementById('density');
+dens.addEventListener('input', () => {
+  document.getElementById('density-val').textContent = dens.value;
+  engines.forEach(en => en.setTarget(parseInt(dens.value, 10)));
+});
+
+// expose for headless verification
+window.__engines = engines;
+</script>
+</body>
+</html>
