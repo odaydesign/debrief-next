@@ -38,45 +38,80 @@ const EditorialList = ({ articles, onArticleClick }) => (
   </div>
 );
 
-// ─── Editorial masthead ──────────────────────────────────────────────────────
-const Masthead = ({ kicker, date, count }) => (
-  <div className="max-w-[640px] mx-auto px-4 pt-16 pb-7">
-    <div className="flex items-center justify-between">
-      <span className="font-serif text-xl font-semibold tracking-tight">Debrief</span>
-      {count != null && <span className="meta">{count} brief{count === 1 ? '' : 'er'}</span>}
+// ─── Editorial masthead (per day) ────────────────────────────────────────────
+const editionNo = (date) => {
+  const d = new Date(date);
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000); // day-of-year as a stable edition number
+};
+
+const totalMinutes = (articles) => {
+  const sum = articles.reduce((acc, a) => {
+    const m = parseInt(String(a.readTime || '').match(/\d+/)?.[0] || '0', 10);
+    return acc + (m || 0);
+  }, 0);
+  return sum || articles.length * 3;
+};
+
+const dayTopics = (articles) => {
+  const seen = [];
+  for (const a of articles) {
+    const t = a.tag || a.category;
+    if (t && !seen.includes(t)) seen.push(t);
+    if (seen.length >= 3) break;
+  }
+  return seen;
+};
+
+const fmtTopic = (t) => (t.length <= 3 ? t.toUpperCase() : t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+
+const joinTopics = (topics) => {
+  const f = topics.map(fmtTopic);
+  if (f.length === 0) return 'Dagens viktigaste';
+  if (f.length === 1) return f[0];
+  return f.slice(0, -1).join(', ') + ' & ' + f[f.length - 1];
+};
+
+const Masthead = ({ date, articles, onBack }) => {
+  const count = articles.length;
+  const min = totalMinutes(articles);
+  const dateLabel = date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const topics = joinTopics(dayTopics(articles));
+
+  return (
+    <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9">
+      {onBack ? (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-muted hover:text-ink transition-colors mb-5 group"
+        >
+          <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
+          Tillbaka
+        </button>
+      ) : (
+        <span className="font-serif text-base font-semibold tracking-tight block mb-3">Debrief</span>
+      )}
+
+      <p className="kicker mb-3">Edition №{editionNo(date)} · {dateLabel}</p>
+
+      <h1 className="font-serif font-semibold text-[2.1rem] md:text-[2.9rem] leading-[1.05] tracking-tight">
+        {topics} <span className="text-muted">— allt du behöver på {min} minuter.</span>
+      </h1>
+
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-5">
+        <span className="meta">{count} {count === 1 ? 'brief' : 'briefer'}</span>
+        <span className="meta">{min} min</span>
+        <span className="meta" style={{ color: 'var(--accent)' }}>Handplockat</span>
+      </div>
     </div>
-    <div className="h-px bg-line-strong my-4" />
-    <p className="kicker mb-2">{kicker}</p>
-    <h1 className="font-serif text-[2.25rem] md:text-[2.75rem] leading-[1.02] tracking-tight capitalize">
-      {date}
-    </h1>
-  </div>
-);
+  );
+};
 
 // ─── Day layout — header + list, used for opened stacks ──────────────────────
 const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
-  const dateLabel = date.toLocaleDateString('sv-SE', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  });
-
   return (
     <div className="min-h-screen bg-bg text-ink">
-      <div className="max-w-[640px] mx-auto px-4 pt-7">
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-muted hover:text-ink transition-colors mb-5 group"
-          >
-            <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
-            Tillbaka
-          </button>
-        )}
-        <p className="kicker mb-2">Dagsnummer</p>
-        <h1 className="font-serif text-[2rem] md:text-[2.75rem] leading-[1.04] tracking-tight capitalize">
-          {dateLabel}
-        </h1>
-        <div className="h-px bg-line-strong mt-5" />
-      </div>
+      <Masthead date={date} articles={articles} onBack={onClose} />
 
       {articles.length === 0 ? (
         <div className="px-5 py-20 text-center text-muted">
@@ -226,11 +261,7 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
               {/* Today — editorial list ─────────────────────────────────── */}
               {weekStacks.length > 0 && (
                 <div className="border-b border-line pb-12">
-                  <Masthead
-                    kicker="Dagens Översikt"
-                    date={weekStacks[0].date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    count={weekStacks[0].articles.length}
-                  />
+                  <Masthead date={weekStacks[0].date} articles={weekStacks[0].articles} />
                   {weekStacks[0].articles.length === 0 ? (
                     <div className="px-5 py-16 text-center text-muted">
                       Inga artiklar publicerade idag.
