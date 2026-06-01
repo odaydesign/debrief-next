@@ -38,8 +38,12 @@
   @media(hover:hover){.card:hover{border-color:var(--line-strong);box-shadow:0 18px 50px -24px rgba(0,0,0,.6);}}
   .chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink);}
   .chip i{width:6px;height:6px;border-radius:99px;background:var(--accent);display:inline-block;}
-  .halftone{position:relative;width:100%;aspect-ratio:16/10;background:var(--card);cursor:crosshair;touch-action:pan-y;}
-  .halftone canvas{display:block;width:100%;height:100%;}
+  .halftone{position:relative;width:100%;aspect-ratio:16/10;background:var(--card);cursor:crosshair;touch-action:pan-y;overflow:hidden;}
+  .halftone .base{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .5s ease;}
+  .halftone canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .45s ease;}
+  .halftone.active canvas{opacity:1;}
+  .halftone.active .base{opacity:0;}
+  @media(hover:hover){.halftone:hover .hint{opacity:0;}}
   .hint{position:absolute;left:10px;bottom:10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:rgba(0,0,0,.35);backdrop-filter:blur(4px);padding:3px 8px;border-radius:6px;pointer-events:none;opacity:.85;}
   .pad{padding:15px 16px 16px;}
   .pad h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.32rem;line-height:1.16;margin:0 0 6px;letter-spacing:-.01em;}
@@ -53,7 +57,7 @@
 <div class="wrap">
   <p class="kicker">Engine · Canvas 2D</p>
   <h1 class="title">Halftone dots</h1>
-  <p class="sub">Each card image is sampled into ~4,000 dots on a single canvas. Hover (or tap on mobile) to send a radial wave through the field — the dots implode and explode outward from your cursor.</p>
+  <p class="sub">Each card shows the real photo. Hover (or press on mobile) and it dissolves into ~4,000 sampled dots — a radial wave implodes and explodes from your cursor. Move away and it fades back to the image.</p>
 
   <div class="controls">
     <label>Färg
@@ -94,15 +98,18 @@ class Halftone {
     this.ready = false;
     this.inkRGB = [243, 239, 230];
 
-    this._onEnter = (e) => this._activate(e);
+    this._onEnter = (e) => { if (e.pointerType !== 'touch') this._activate(e); };
     this._onMove  = (e) => this._move(e);
-    this._onLeave = () => { this.target = 0; this._ensureRAF(); };
+    this._onLeave = () => { this.target = 0; this.host.classList.remove('active'); this._ensureRAF(); };
     this._onDown  = (e) => { this._activate(e); this.t = 0; };
+    this._onUp    = (e) => { if (e.pointerType === 'touch') { this.target = 0; this.host.classList.remove('active'); this._ensureRAF(); } };
 
     host.addEventListener('pointerenter', this._onEnter);
     host.addEventListener('pointermove', this._onMove);
     host.addEventListener('pointerleave', this._onLeave);
     host.addEventListener('pointerdown', this._onDown);
+    host.addEventListener('pointerup', this._onUp);
+    host.addEventListener('pointercancel', this._onUp);
 
     this._load();
     this._ro = new ResizeObserver(() => this._resize());
@@ -208,6 +215,7 @@ class Halftone {
     this.cx = (e.clientX - r.left);
     this.cy = (e.clientY - r.top);
     this.target = 1;
+    this.host.classList.add('active');
     this._ensureRAF();
   }
   _move(e) {
@@ -346,7 +354,8 @@ function render() {
   feed.innerHTML = CARDS.map((c, i) => `
     <article class="card">
       <div class="halftone" id="ht-${i}">
-        <div class="hint">Hover →</div>
+        <img class="base" src="${c.src}" alt="" loading="lazy">
+        <div class="hint">Hover → dots</div>
       </div>
       <div class="pad">
         <div class="topline"><span class="chip"><i></i>${c.tag}</span></div>
