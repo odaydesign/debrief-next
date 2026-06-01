@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
-import { X, Bookmark } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { X, Bookmark, StickyNote, Plus, Trash2 } from 'lucide-react';
 import { Tweet } from 'react-tweet';
 import { useMainOptional } from '@/lib/MainContext';
+import { useQuery, useMutation, api } from '@/lib/db';
 
 const ArticleOverlay = ({ card, isOpen, onClose }) => {
     const scrollRef = useRef(null);
@@ -11,6 +12,28 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
     const backdropRef = useRef(null);
     const onCloseRef = useRef(onClose);
     const main = useMainOptional();
+
+    // ── Article notes ──────────────────────────────────────────────────────
+    const user = main?.user || null;
+    const articleId = card?.id || card?._id || null;
+    const notes = useQuery(api.notes.getByArticle, user && articleId ? { articleId, userId: user.id } : "skip");
+    const addNoteMutation = useMutation(api.notes.add);
+    const removeNoteMutation = useMutation(api.notes.remove);
+    const [noteText, setNoteText] = useState("");
+    const [savingNote, setSavingNote] = useState(false);
+
+    const submitNote = async (e) => {
+        e?.preventDefault?.();
+        const t = noteText.trim();
+        if (!t || !user || !articleId) return;
+        setSavingNote(true);
+        try {
+            await addNoteMutation({ articleId, text: t, userId: user.id });
+            setNoteText("");
+        } finally {
+            setSavingNote(false);
+        }
+    };
 
     useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
@@ -34,7 +57,7 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
         const backdrop = backdropRef.current;
         if (!scroller || !panel) return;
 
-        let startY = 0, dy = 0, mode = null;
+        let startY = 0, dy = 0, mode = null, startedOnControl = false;
         const atTop = () => scroller.scrollTop <= 0;
         const atBottom = () => scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
         const reset = () => {
@@ -43,8 +66,13 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
             if (backdrop) backdrop.style.opacity = '';
             mode = null; dy = 0;
         };
-        const onStart = (e) => { if (e.touches.length !== 1) return; startY = e.touches[0].clientY; dy = 0; mode = null; };
+        const onStart = (e) => {
+            if (e.touches.length !== 1) return;
+            startedOnControl = !!(e.target.closest && e.target.closest('textarea, input, button, a, [data-no-swipe]'));
+            startY = e.touches[0].clientY; dy = 0; mode = null;
+        };
         const onMove = (e) => {
+            if (startedOnControl) return;
             dy = e.touches[0].clientY - startY;
             if (mode === null) {
                 if (dy > 4 && atTop()) mode = 'down';
@@ -191,6 +219,61 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
                                 </a>
                             </div>
                         )}
+
+                        {/* notes */}
+                        <div className="mt-12 pt-7 border-t border-line">
+                            <div className="flex items-center gap-2 mb-4">
+                                <StickyNote size={15} className="text-accent" />
+                                <span className="meta" style={{ color: 'var(--ink)', letterSpacing: '0.14em' }}>Mina anteckningar</span>
+                                {notes?.length ? <span className="meta">{notes.length}</span> : null}
+                            </div>
+
+                            {user ? (
+                                <form onSubmit={submitNote} className="mb-5">
+                                    <textarea
+                                        value={noteText}
+                                        onChange={(e) => setNoteText(e.target.value)}
+                                        placeholder="Skriv en anteckning om den här artikeln…"
+                                        rows={3}
+                                        className="w-full bg-card border border-line rounded-xl p-3 text-[15px] leading-relaxed text-ink placeholder:text-muted resize-none focus:outline-none focus:border-accent"
+                                    />
+                                    <div className="flex justify-end mt-2">
+                                        <button
+                                            type="submit"
+                                            disabled={!noteText.trim() || savingNote}
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent text-accent-ink text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 active:scale-95"
+                                        >
+                                            <Plus size={14} /> {savingNote ? 'Sparar…' : 'Spara anteckning'}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <p className="meta mb-5">Logga in för att spara anteckningar.</p>
+                            )}
+
+                            <div className="flex flex-col gap-3">
+                                {(notes || []).map((n) => (
+                                    <div key={n._id} className="group bg-card border border-line rounded-xl p-3.5">
+                                        <div className="flex items-start gap-3">
+                                            <p className="flex-1 text-[15px] leading-relaxed text-ink whitespace-pre-wrap">{n.text}</p>
+                                            <button
+                                                onClick={() => removeNoteMutation({ id: n._id })}
+                                                aria-label="Radera anteckning"
+                                                className="shrink-0 text-muted hover:text-ink transition-colors md:opacity-0 md:group-hover:opacity-100 active:scale-90"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </div>
+                                        {n.createdAt && (
+                                            <p className="meta mt-2">{new Date(n.createdAt).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}</p>
+                                        )}
+                                    </div>
+                                ))}
+                                {user && notes && notes.length === 0 && (
+                                    <p className="meta">Inga anteckningar än.</p>
+                                )}
+                            </div>
+                        </div>
 
                         {/* reading-end footer */}
                         <div className="mt-12 pt-7 border-t border-line">

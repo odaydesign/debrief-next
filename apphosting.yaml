@@ -39,3 +39,19 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+  # Optional: override the daily-summary model (default openai/gpt-4o-mini).
+  - variable: OPENROUTER_MODEL
+    value: openai/gpt-4o-mini
+    availability:
+      - RUNTIME
+
+  # ── Daily-summary LLM key (OpenRouter, OpenAI-compatible) ──────────────────
+  # DISABLED until the secret exists — App Hosting fails a rollout if it
+  # references a missing secret. To enable the AI daily summary:
+  #   1) npx firebase-tools apphosting:secrets:set openrouter-api-key   (paste the key)
+  #   2) Uncomment the block below and redeploy.
+  # - variable: OPENROUTER_API_KEY
+  #   secret: openrouter-api-key
+  #   availability:
+  #     - RUNTIME

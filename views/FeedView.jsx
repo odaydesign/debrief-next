@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
+import { useDailySummary } from "@/lib/dailySummary";
 import { Layers, ArrowLeft } from 'lucide-react';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ const Masthead = ({ date, articles, onBack }) => {
   const count = articles.length;
   const min = totalMinutes(articles);
   const dateLabel = date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const aiSummary = useDailySummary(date, articles);
   const { ink, tail } = summaryParts(articles);
 
   return (
@@ -113,7 +115,9 @@ const Masthead = ({ date, articles, onBack }) => {
       <p className="kicker mb-3">Edition №{editionNo(date)} · {dateLabel}</p>
 
       <h1 className="font-serif font-semibold text-[1.95rem] md:text-[2.6rem] leading-[1.08] tracking-tight">
-        {ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}
+        {aiSummary
+          ? aiSummary
+          : <>{ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}</>}
       </h1>
 
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-5">

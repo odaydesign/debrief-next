@@ -33,6 +33,17 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
+    // Cached AI daily summaries, keyed by date (YYYY-MM-DD). Public to read.
+    // Any signed-in user may warm the cache (the value is generated server-side
+    // by /api/daily-summary); writes are shape/size constrained to limit abuse.
+    match /editions/{date} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.resource.data.summary is string
+        && request.resource.data.summary.size() > 0
+        && request.resource.data.summary.size() < 600;
+    }
+
     // Deny everything else by default.
     match /{document=**} {
       allow read, write: if false;
