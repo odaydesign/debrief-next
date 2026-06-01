@@ -1,117 +1,218 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { X, Bookmark } from 'lucide-react';
 import { Tweet } from 'react-tweet';
+import { useMainOptional } from '@/lib/MainContext';
 
 const ArticleOverlay = ({ card, isOpen, onClose }) => {
+    const scrollRef = useRef(null);
+    const panelRef = useRef(null);
+    const backdropRef = useRef(null);
+    const onCloseRef = useRef(onClose);
+    const main = useMainOptional();
+
+    useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
+    // Lock page scroll + reset reader scroll/transform when opening.
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            if (scrollRef.current) scrollRef.current.scrollTop = 0;
+            if (panelRef.current) { panelRef.current.classList.remove('sheet-dragging'); panelRef.current.style.transform = ''; }
+            if (backdropRef.current) backdropRef.current.style.opacity = '';
         } else {
             document.body.style.overflow = 'auto';
         }
         return () => { document.body.style.overflow = 'auto'; };
     }, [isOpen]);
 
+    // Native swipe-up / swipe-down to close (non-passive so we can preventDefault).
+    useEffect(() => {
+        const scroller = scrollRef.current;
+        const panel = panelRef.current;
+        const backdrop = backdropRef.current;
+        if (!scroller || !panel) return;
+
+        let startY = 0, dy = 0, mode = null;
+        const atTop = () => scroller.scrollTop <= 0;
+        const atBottom = () => scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1;
+        const reset = () => {
+            panel.classList.remove('sheet-dragging');
+            panel.style.transform = '';
+            if (backdrop) backdrop.style.opacity = '';
+            mode = null; dy = 0;
+        };
+        const onStart = (e) => { if (e.touches.length !== 1) return; startY = e.touches[0].clientY; dy = 0; mode = null; };
+        const onMove = (e) => {
+            dy = e.touches[0].clientY - startY;
+            if (mode === null) {
+                if (dy > 4 && atTop()) mode = 'down';
+                else if (dy < -4 && atBottom()) mode = 'up';
+                else return;
+                panel.classList.add('sheet-dragging');
+            }
+            const h = panel.clientHeight || window.innerHeight;
+            if (mode === 'down') {
+                if (scroller.scrollTop > 0) { reset(); return; }
+                e.preventDefault();
+                panel.style.transform = `translateY(${Math.max(0, dy)}px)`;
+                if (backdrop) backdrop.style.opacity = String(Math.max(0, 1 - dy / h * 1.25));
+            } else {
+                e.preventDefault();
+                panel.style.transform = `translateY(${Math.min(0, dy) * 0.45}px)`;
+                if (backdrop) backdrop.style.opacity = String(Math.max(0.4, 1 - (-dy) / h));
+            }
+        };
+        const onEnd = () => {
+            if (mode === null) return;
+            const h = panel.clientHeight || window.innerHeight;
+            const close = (mode === 'down' && dy > Math.min(150, h * 0.2)) || (mode === 'up' && -dy > 100);
+            if (close) {
+                if (navigator.vibrate) { try { navigator.vibrate(10); } catch { /* ignore */ } }
+                reset();
+                onCloseRef.current?.();
+            } else {
+                reset();
+            }
+        };
+
+        scroller.addEventListener('touchstart', onStart, { passive: true });
+        scroller.addEventListener('touchmove', onMove, { passive: false });
+        scroller.addEventListener('touchend', onEnd);
+        scroller.addEventListener('touchcancel', reset);
+        return () => {
+            scroller.removeEventListener('touchstart', onStart);
+            scroller.removeEventListener('touchmove', onMove);
+            scroller.removeEventListener('touchend', onEnd);
+            scroller.removeEventListener('touchcancel', reset);
+        };
+    }, [card]);
+
     if (!card) return null;
+
+    const tag = card.tag || card.category;
+    const dateStr = card.date instanceof Date ? card.date.toLocaleDateString('sv-SE') : card.date;
+    const id = card.id || card._id;
+    const saved = !!card.isBookmarked;
+    const lead = card.description || card.summary;
+    const body = card.fullText || card.content || "";
 
     return (
         <div className={`fixed inset-0 z-50 flex items-end justify-center ${isOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
 
             {/* Dimmed Backdrop */}
             <div
-                className={`absolute inset-0 bg-[#2a2726]/80 backdrop-blur-md transition-opacity duration-[800ms] ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                ref={backdropRef}
+                className={`absolute inset-0 bg-black/55 backdrop-blur-md transition-opacity duration-[600ms] ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
             />
 
             {/* Sliding Article Panel */}
             <div
-                className={`relative w-full max-w-[900px] h-[92vh] bg-[#f6f4f1] text-[#2a2726] rounded-t-[2.5rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
+                ref={panelRef}
+                className={`relative w-full max-w-[760px] h-[94vh] bg-bg text-ink rounded-t-[1.75rem] border-t border-line shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.55)] flex flex-col overflow-hidden transition-transform duration-[550ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
             >
-                {/* Sticky Header with Close Button */}
-                <div className={`absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10 bg-gradient-to-b from-[#f6f4f1] to-transparent transition-opacity duration-[800ms] delay-150 ${isOpen ? 'opacity-100' : 'opacity-0'}`}>
-                    <button
-                        onClick={onClose}
-                        className="w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-white hover:scale-105 transition-all shadow-sm text-stone-900"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                </div>
+                {/* Scrollable Article Content (also the swipe surface) */}
+                <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar" style={{ touchAction: 'pan-y' }}>
+                    <div className="sheet-grab"><span /></div>
 
-                {/* Scrollable Article Content */}
-                <div className={`flex-1 overflow-y-auto px-6 md:px-16 pt-24 pb-32 custom-scrollbar transition-all duration-[800ms] delay-[150ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-
-                    {card.tag && (
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-8 inline-block ${card.tagStyle || 'bg-[#50c878] text-white'}`}>
-                            {card.tag}
-                        </span>
-                    )}
-
-                    <h1 className="font-serif text-4xl md:text-5xl leading-tight mb-6">
-                        {card.title}
-                    </h1>
-
-                    {card.date && <p className="text-sm font-bold opacity-50 tracking-wider mb-8">{card.date instanceof Date ? card.date.toLocaleDateString('sv-SE') : card.date}</p>}
-
-                    {card.type === 'twitter' && card.externalId && (
-                        <div data-theme="light" className="w-full flex justify-center mb-8">
-                            <Tweet id={card.externalId} />
+                    <div className="max-w-[680px] mx-auto px-5 md:px-8 pb-32 pt-1">
+                        {/* topline: chip + close */}
+                        <div className="flex items-center justify-between mb-5">
+                            {tag ? <span className="chip"><span className="chip-dot" />{tag}</span> : <span />}
+                            <button
+                                onClick={onClose}
+                                aria-label="Stäng"
+                                className="w-9 h-9 rounded-full border border-line bg-card text-ink flex items-center justify-center hover:bg-surface transition-colors active:scale-90"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
-                    )}
 
-                    {card.type === 'youtube' && card.externalId && (
-                        <div className="w-full aspect-video rounded-[2rem] overflow-hidden mb-12 shadow-lg bg-black">
-                            <iframe
-                                src={`https://www.youtube.com/embed/${card.externalId}`}
-                                title={card.title}
-                                className="w-full h-full border-0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
-                        </div>
-                    )}
+                        <h1 className="font-serif text-[2rem] md:text-[2.6rem] leading-[1.08] tracking-tight mb-3">
+                            {card.title}
+                        </h1>
+                        {dateStr && <p className="meta mb-7">{dateStr}</p>}
 
-                    {!((card.type === 'youtube' || card.type === 'twitter') && card.externalId) && card.image && (
-                        <div className="w-full aspect-video rounded-[2rem] overflow-hidden mb-12 shadow-lg">
-                            <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
-                        </div>
-                    )}
-
-                    <div className="prose prose-lg prose-zinc max-w-none text-[#2a2726] font-sans">
-                        <p className="text-xl md:text-2xl leading-relaxed opacity-90 mb-8 font-serif">
-                            {card.description || card.summary}
-                        </p>
-
-                        <div className="text-base md:text-lg opacity-80 space-y-6 leading-relaxed">
-                            <div dangerouslySetInnerHTML={{ __html: card.fullText || card.content || "" }} />
-                            {(!card.fullText && !card.content) && (
-                                <>
-                                    <p>
-                                        I en era som definieras av snabba tekniska förändringar är förmågan att anpassa sig och förutse grundläggande skiften avgörande. Denna utveckling markerar en betydande milstolpe i det bredare landskapet och sätter nya riktmärken för innovation och operationell skala.
-                                    </p>
-                                    <p>
-                                        Analytiker tror att detta drag kommer att utlösa en kaskad av liknande strategier över hela branschen. "Vi bevittnar mognaden av koncept som var rent teoretiska för bara fem år sedan," noterade en ledande forskare. "Ekosystemet är äntligen tillräckligt robust för att stödja denna nivå av ambition utan att kompromissa med stabiliteten."
-                                    </p>
-                                    <p>
-                                        Framöver planerar teamet att utöka sitt operationella fotavtryck avsevärt under de kommande 18 månaderna. Med resurserna nu säkrade skiftar fokus helt från att bevisa konceptet till att skala utförandet globalt.
-                                    </p>
-                                </>
-                            )}
-
-                            {card.sourceLink && (
-                                <div className="mt-12 pt-8 border-t border-[#2a2726]/10">
-                                    <a
-                                        href={card.sourceLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#50c878] hover:text-[#2a2726] transition-colors"
-                                    >
-                                        {card.sourceText || 'Till Källan'}
-                                        <ArrowLeft className="w-4 h-4 rotate-135" style={{ transform: 'rotate(135deg)' }} />
-                                    </a>
+                        {/* media */}
+                        {card.type === 'twitter' && card.externalId && (
+                            <div data-theme="dark" className="w-full flex justify-center mb-8">
+                                <Tweet id={card.externalId} />
+                            </div>
+                        )}
+                        {card.type === 'youtube' && card.externalId && (
+                            <div className="w-full aspect-video rounded-2xl overflow-hidden mb-9 shadow-lg bg-black">
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${card.externalId}`}
+                                    title={card.title}
+                                    className="w-full h-full border-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                        )}
+                        {!((card.type === 'youtube' || card.type === 'twitter') && card.externalId) && card.image && (
+                            <figure className="mb-9">
+                                <div className="w-full aspect-video rounded-2xl overflow-hidden border border-line">
+                                    <img src={card.image} alt={card.title} className="w-full h-full object-cover" />
                                 </div>
-                            )}
+                                <figcaption className="meta mt-2">Foto · {card.source || 'Debrief'}</figcaption>
+                            </figure>
+                        )}
+
+                        {/* lead */}
+                        {lead && (
+                            <p className="reader-body drop-cap font-serif text-[1.3rem] md:text-[1.45rem] leading-[1.55] mb-7">
+                                {lead}
+                            </p>
+                        )}
+
+                        {/* body */}
+                        {body ? (
+                            <div className="reader-body" dangerouslySetInnerHTML={{ __html: body }} />
+                        ) : (
+                            <div className="reader-body">
+                                <p>I en era som definieras av snabba tekniska förändringar är förmågan att anpassa sig och förutse grundläggande skiften avgörande. Denna utveckling markerar en betydande milstolpe i det bredare landskapet och sätter nya riktmärken för innovation och operationell skala.</p>
+                                <p>Analytiker tror att detta drag kommer att utlösa en kaskad av liknande strategier över hela branschen. "Vi bevittnar mognaden av koncept som var rent teoretiska för bara fem år sedan," noterade en ledande forskare.</p>
+                                <p>Framöver planerar teamet att utöka sitt operationella fotavtryck avsevärt under de kommande 18 månaderna. Med resurserna nu säkrade skiftar fokus helt från att bevisa konceptet till att skala utförandet globalt.</p>
+                            </div>
+                        )}
+
+                        {card.sourceLink && (
+                            <div className="mt-10 pt-7 border-t border-line">
+                                <a
+                                    href={card.sourceLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-accent hover:opacity-70 transition-opacity"
+                                >
+                                    {card.sourceText || 'Till källan'} ↗
+                                </a>
+                            </div>
+                        )}
+
+                        {/* reading-end footer */}
+                        <div className="mt-12 pt-7 border-t border-line">
+                            <p className="meta text-center text-faint tracking-[0.25em] mb-5">— SLUT —</p>
+                            <div className="flex items-center gap-3">
+                                {id && main?.toggleBookmark && (
+                                    <button
+                                        onClick={() => main.toggleBookmark(id)}
+                                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors active:scale-95 ${saved ? 'bg-accent border-accent text-accent-ink' : 'border-line text-ink hover:bg-surface'}`}
+                                    >
+                                        <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
+                                        {saved ? 'Sparad' : 'Spara'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={onClose}
+                                    className="ml-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-accent-ink text-sm font-semibold hover:opacity-90 transition-opacity active:scale-95"
+                                >
+                                    Stäng ↓
+                                </button>
+                            </div>
+                            <p className="meta text-center text-faint mt-5">Svep upp eller ner för att stänga</p>
                         </div>
                     </div>
                 </div>

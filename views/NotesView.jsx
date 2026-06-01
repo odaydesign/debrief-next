@@ -11,17 +11,17 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
     const { user } = useMain();
 
     return (
-        <div className="pb-32 px-6 pt-12 min-h-screen bg-stone-900 border-x border-stone-800 animate-in fade-in duration-500">
+        <div className="pb-32 px-6 pt-12 min-h-screen bg-bg animate-in fade-in duration-500">
             <header className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-4xl font-serif text-cream tracking-tight mb-2">Mina anteckningar</h1>
-                    <p className="text-stone-400 font-sans text-sm">Dina snabba tankar och höjdpunkter.</p>
+                    <h1 className="text-4xl font-serif text-ink tracking-tight mb-2">Mina anteckningar</h1>
+                    <p className="text-muted font-sans text-sm">Dina snabba tankar och höjdpunkter.</p>
                 </div>
             </header>
 
             <div className="space-y-6">
                 {notes.length === 0 ? (
-                    <div className="text-center py-20 text-stone-500">
+                    <div className="text-center py-20 text-muted">
                         <FileText size={48} className="mx-auto mb-4 opacity-20" />
                         <p className="font-sans">Inga anteckningar ännu. Lägg till anteckningar medan du läser artiklar.</p>
                     </div>
@@ -36,30 +36,30 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 key={note.id}
-                                className="bg-stone-800/60 border border-stone-700 rounded-2xl p-5 mb-4 relative group"
+                                className="bg-card border border-line rounded-2xl p-5 mb-4 relative group"
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div
-                                        className="flex items-center gap-3 pb-4 border-b border-stone-700/50 cursor-pointer group/item flex-1 overflow-hidden"
+                                        className="flex items-center gap-3 pb-4 border-b border-line cursor-pointer group/item flex-1 overflow-hidden"
                                         onClick={() => setActiveArticle(article)}
                                     >
                                         <img src={article.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
                                         <div className="flex-1 overflow-hidden">
-                                            <h3 className="text-cream font-bold text-sm truncate group-hover/item:text-green-400 transition-colors">
+                                            <h3 className="text-ink font-bold text-sm truncate group-hover/item:text-accent transition-colors">
                                                 {article.title}
                                             </h3>
                                             <div className="flex items-center gap-2 mt-0.5">
-                                                <p className="text-stone-400 text-xs">
+                                                <p className="text-muted text-xs">
                                                     {new Date(note.createdAt).toLocaleDateString('sv-SE')}
                                                 </p>
                                                 {note.highlightText && (
-                                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-[#50c878] bg-[#50c878]/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-accent bg-accent-soft px-1.5 py-0.5 rounded uppercase tracking-wider">
                                                         <Highlighter size={8} /> Highlight
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
-                                        <ChevronRight size={16} className="text-stone-500 group-hover/item:text-green-400 transition-colors shrink-0" />
+                                        <ChevronRight size={16} className="text-muted group-hover/item:text-accent transition-colors shrink-0" />
                                     </div>
 
                                     <button
@@ -69,7 +69,7 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                                 await deleteNoteMutation({ id: note._id || note.id, userId: user?.id });
                                             }
                                         }}
-                                        className="ml-3 p-1.5 rounded-lg text-stone-500 hover:text-red-400 hover:bg-stone-700/50 transition-all opacity-0 group-hover:opacity-100"
+                                        className="ml-3 p-1.5 rounded-lg text-muted hover:text-red-400 hover:bg-surface transition-all opacity-0 group-hover:opacity-100"
                                         title="Radera anteckning"
                                     >
                                         <Trash2 size={16} />
@@ -77,7 +77,7 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                 </div>
 
                                 {note.highlightText && (
-                                    <div className={`pl-3 border-l-2 font-serif italic text-stone-300 text-sm mb-3 ${
+                                    <div className={`pl-3 border-l-2 font-serif italic text-dek text-sm mb-3 ${
                                         note.color === 'green' ? 'border-emerald-400' :
                                         note.color === 'blue' ? 'border-blue-400' :
                                         note.color === 'purple' ? 'border-purple-400' : 'border-yellow-400'
@@ -87,7 +87,7 @@ const NotesView = ({ notes, articles, setActiveArticle }) => {
                                 )}
 
                                 {note.text && note.text !== 'Highlight' && (
-                                    <p className="text-stone-300 font-sans text-sm leading-relaxed">
+                                    <p className="text-dek font-sans text-sm leading-relaxed">
                                         {note.text}
                                     </p>
                                 )}

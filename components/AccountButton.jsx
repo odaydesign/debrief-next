@@ -64,7 +64,7 @@ export default function AccountButton() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Konto"
-        className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg flex items-center justify-center overflow-hidden text-[#f6f4f1] hover:bg-white/20 transition-colors"
+        className="w-10 h-10 rounded-full bg-card border border-line shadow-lg flex items-center justify-center overflow-hidden text-ink hover:bg-surface transition-colors active:scale-90"
       >
         {photoURL ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -77,18 +77,18 @@ export default function AccountButton() {
       </button>
 
       {open && (
-        <div className="absolute top-12 right-0 w-64 rounded-2xl bg-[#3a3633] border border-white/15 shadow-2xl p-4 text-[#f6f4f1]">
+        <div className="absolute top-12 right-0 w-64 rounded-2xl bg-card border border-line shadow-2xl p-4 text-ink">
           {isAnonymous ? (
             <>
               <p className="text-sm font-semibold">Gäst</p>
-              <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
+              <p className="text-xs text-muted mt-0.5 leading-relaxed">
                 Dina anteckningar och bokmärken sparas på den här enheten. Logga
                 in för att spara dem permanent.
               </p>
               <button
                 onClick={handleGoogle}
                 disabled={busy}
-                className="mt-3 w-full rounded-xl bg-white text-[#1a1a1a] text-sm font-semibold py-2.5 hover:bg-white/90 transition-colors disabled:opacity-60"
+                className="mt-3 w-full rounded-xl bg-accent text-accent-ink text-sm font-semibold py-2.5 hover:opacity-90 transition-opacity disabled:opacity-60"
               >
                 Logga in med Google
               </button>
@@ -99,12 +99,12 @@ export default function AccountButton() {
                 {displayName || "Inloggad"}
               </p>
               {email && (
-                <p className="text-xs text-white/60 mt-0.5 truncate">{email}</p>
+                <p className="text-xs text-muted mt-0.5 truncate">{email}</p>
               )}
               <button
                 onClick={handleSignOut}
                 disabled={busy}
-                className="mt-3 w-full rounded-xl bg-white/10 border border-white/15 text-sm font-medium py-2.5 hover:bg-white/15 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                className="mt-3 w-full rounded-xl bg-surface border border-line text-sm font-medium py-2.5 hover:opacity-80 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 <LogOut size={15} /> Logga ut
               </button>

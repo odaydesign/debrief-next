@@ -1,26 +1,214 @@
 @import "tailwindcss";
 
-@theme {
+/* ─── Theme registration (Tailwind v4) ─────────────────────────────
+   These map live CSS variables (which flip per data-theme) onto
+   Tailwind color/font utilities: bg-bg, bg-card, text-ink, text-dek,
+   text-muted, border-line, text-accent, bg-accent, font-serif, font-mono… */
+@theme inline {
     --color-apple-gray: #F5F5F7;
-    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-serif: "Playfair Display", serif;
+    --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+    --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-card: var(--card);
+    --color-ink: var(--ink);
+    --color-dek: var(--dek);
+    --color-muted: var(--muted);
+    --color-faint: var(--faint);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-accent: var(--accent);
+    --color-accent-ink: var(--accent-ink);
+    --color-accent-soft: var(--accent-soft);
+}
+
+/* ─── Ink (dark, default) ─────────────────────────────────────────── */
+:root,
+:root[data-theme="ink"] {
+    --bg: #26231f;
+    --surface: #2f2b27;
+    --card: #322e29;
+    --ink: #f3efe6;
+    --dek: rgba(243, 239, 230, 0.66);
+    --muted: rgba(243, 239, 230, 0.5);
+    --faint: rgba(243, 239, 230, 0.34);
+    --line: rgba(243, 239, 230, 0.14);
+    --line-strong: rgba(243, 239, 230, 0.26);
+    --accent: #50c878;
+    --accent-ink: #11241a;
+    --accent-soft: rgba(80, 200, 120, 0.14);
+    color-scheme: dark;
+}
+
+/* ─── Paper (light) ───────────────────────────────────────────────── */
+:root[data-theme="paper"] {
+    --bg: #f4f1ea;
+    --surface: #efeae0;
+    --card: #fffdf8;
+    --ink: #1f1c18;
+    --dek: rgba(31, 28, 24, 0.66);
+    --muted: rgba(31, 28, 24, 0.5);
+    --faint: rgba(31, 28, 24, 0.34);
+    --line: rgba(31, 28, 24, 0.13);
+    --line-strong: rgba(31, 28, 24, 0.26);
+    --accent: #1f8f55;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(31, 143, 85, 0.12);
+    color-scheme: light;
 }
 
 body {
-    background-color: #46423f;
-    color: #f6f4f1;
+    background-color: var(--bg);
+    color: var(--ink);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 html {
     scroll-behavior: smooth;
 }
 
+::selection {
+    background: var(--accent-soft);
+}
+
+/* ─── Editorial helpers ───────────────────────────────────────────── */
+.kicker {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.meta {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+}
+
+.chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent);
+}
+
+.must-spine::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    z-index: 2;
+    border-radius: 18px 0 0 18px;
+}
+
+.drop-cap::first-letter {
+    -webkit-initial-letter: 2;
+    initial-letter: 2;
+    font-weight: 500;
+    margin-right: 0.08em;
+    color: var(--accent);
+}
+
+/* reveal-on-scroll */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in {
+    opacity: 1;
+    transform: none;
+}
+
+/* reader grab handle + drag state */
+.sheet-grab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+}
+.sheet-grab span {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--line-strong);
+    transition: background 0.2s, width 0.2s;
+}
+.sheet-dragging .sheet-grab span {
+    background: var(--accent);
+    width: 56px;
+}
+.sheet-dragging {
+    transition: none !important;
+}
+
+/* reader article body (dangerouslySetInnerHTML content), theme-aware */
+.reader-body {
+    font-family: var(--font-serif);
+    color: var(--ink);
+}
+.reader-body p {
+    font-size: 1.12rem;
+    line-height: 1.75;
+    margin: 0 0 1.25rem;
+    color: var(--ink);
+    text-wrap: pretty;
+}
+.reader-body h2,
+.reader-body h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 1.7rem 0 0.6rem;
+}
+.reader-body a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.reader-body ul,
+.reader-body ol {
+    margin: 0 0 1.25rem 1.2rem;
+}
+.reader-body li {
+    margin: 0.3rem 0;
+    line-height: 1.7;
+}
+.reader-body img {
+    border-radius: 12px;
+    margin: 1rem 0;
+}
+
 /* Hide scrollbar */
 .no-scrollbar::-webkit-scrollbar {
     display: none;
 }
-
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -29,52 +217,19 @@ html {
 /* Custom scrollbar for modals */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-/* Admin custom scrollbar */
+/* Admin custom scrollbar (unchanged) */
 .custom-scrollbar-admin::-webkit-scrollbar { width: 6px; }
 .custom-scrollbar-admin::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar-admin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 .custom-scrollbar-admin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
 /* React Tinder Card Styles */
-.swipe {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
-
-.tinder-card-wrapper {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    will-change: transform;
-}
-
-.tinder-card {
-    touch-action: none;
-    user-select: none;
-    -webkit-user-drag: none;
-    -webkit-touch-callout: none;
-}
-
-.swipeable-card {
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-
-.card-stack-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-.card-stack-container * {
-    backface-visibility: hidden;
-}
+.swipe { position: absolute; width: 100%; height: 100%; }
+.tinder-card-wrapper { position: absolute; width: 100%; height: 100%; will-change: transform; }
+.tinder-card { touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
+.swipeable-card { touch-action: none; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+.card-stack-container { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; perspective: 1000px; }
+.card-stack-container * { backface-visibility: hidden; }
