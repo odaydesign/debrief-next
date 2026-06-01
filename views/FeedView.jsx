@@ -53,30 +53,48 @@ const totalMinutes = (articles) => {
   return sum || articles.length * 3;
 };
 
-const dayTopics = (articles) => {
-  const seen = [];
-  for (const a of articles) {
-    const t = a.tag || a.category;
-    if (t && !seen.includes(t)) seen.push(t);
-    if (seen.length >= 3) break;
-  }
-  return seen;
+// Turn a Title-Case headline into a flowing clause. Keeps acronyms / words
+// with digits (GPT-6, AI) intact; lowercases ordinary words. `lead` keeps the
+// first word's original capitalisation (used for the opening clause).
+const clauseCase = (title, lead) => {
+  return String(title)
+    .replace(/[.!?]+$/, '')
+    .split(/\s+/)
+    .map((w, i) => {
+      const keep = /[0-9]/.test(w) || (w.length <= 4 && w === w.toUpperCase());
+      if (keep) return w;
+      if (i === 0 && lead) return w;
+      return w.charAt(0).toLowerCase() + w.slice(1);
+    })
+    .join(' ');
 };
 
-const fmtTopic = (t) => (t.length <= 3 ? t.toUpperCase() : t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+// Build a short, sharp "today's news" summary by weaving the day's top
+// headlines into one sentence. Returns { ink, tail } for a two-tone render
+// (tail = the final clause, shown muted). Falls back gracefully.
+const summaryParts = (articles) => {
+  const titles = articles.map((a) => a.title).filter(Boolean);
+  if (titles.length === 0) return { ink: 'Dagens viktigaste nyheter', tail: null };
 
-const joinTopics = (topics) => {
-  const f = topics.map(fmtTopic);
-  if (f.length === 0) return 'Dagens viktigaste';
-  if (f.length === 1) return f[0];
-  return f.slice(0, -1).join(', ') + ' & ' + f[f.length - 1];
+  const picked = [];
+  let len = 0;
+  for (const t of titles) {
+    if (picked.length >= 3) break;
+    if (picked.length && len + t.length > 78) break;
+    picked.push(t);
+    len += t.length;
+  }
+
+  const clauses = picked.map((t, i) => clauseCase(t, i === 0));
+  if (clauses.length === 1) return { ink: clauses[0], tail: null };
+  return { ink: clauses.slice(0, -1).join(', '), tail: clauses[clauses.length - 1] };
 };
 
 const Masthead = ({ date, articles, onBack }) => {
   const count = articles.length;
   const min = totalMinutes(articles);
   const dateLabel = date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const topics = joinTopics(dayTopics(articles));
+  const { ink, tail } = summaryParts(articles);
 
   return (
     <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9">
@@ -94,8 +112,8 @@ const Masthead = ({ date, articles, onBack }) => {
 
       <p className="kicker mb-3">Edition №{editionNo(date)} · {dateLabel}</p>
 
-      <h1 className="font-serif font-semibold text-[2.1rem] md:text-[2.9rem] leading-[1.05] tracking-tight">
-        {topics} <span className="text-muted">— allt du behöver på {min} minuter.</span>
+      <h1 className="font-serif font-semibold text-[1.95rem] md:text-[2.6rem] leading-[1.08] tracking-tight">
+        {ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}
       </h1>
 
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-5">
