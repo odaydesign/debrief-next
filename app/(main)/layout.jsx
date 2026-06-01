@@ -4,12 +4,13 @@ import { MainProvider, useMain } from "@/lib/MainContext";
 import ArticleOverlay from "@/components/ArticleOverlay";
 import BottomNav from "@/components/BottomNav";
 import AccountButton from "@/components/AccountButton";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function MainLayoutInner({ children }) {
   const { activeArticle, isOverlayOpen, closeOverlay } = useMain();
 
   return (
-    <div className="min-h-screen bg-[#46423f] text-[#f6f4f1] font-sans selection:bg-[#50c878] selection:text-white pb-24 relative">
+    <div className="min-h-screen bg-bg text-ink font-sans pb-24 relative">
       {/* Main Content Area */}
       <div
         className={`transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -23,7 +24,8 @@ function MainLayoutInner({ children }) {
         </main>
       </div>
 
-      {/* Floating account control */}
+      {/* Floating controls */}
+      <ThemeToggle />
       <AccountButton />
 
       {/* Floating Navigation */}

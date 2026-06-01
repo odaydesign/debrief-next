@@ -12,6 +12,11 @@ export function useMain() {
   return context;
 }
 
+// Non-throwing variant — returns null outside a MainProvider (e.g. admin preview).
+export function useMainOptional() {
+  return useContext(MainContext);
+}
+
 const calculateReadTime = (text) => {
   if (!text) return '1 min läsning';
   const words = text.replace(/<[^>]*>/g, '').split(/\s+/).length;

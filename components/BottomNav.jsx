@@ -16,7 +16,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl z-[60] flex justify-between items-center p-1.5 px-4 pointer-events-auto">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-card/90 backdrop-blur-xl border border-line rounded-2xl shadow-2xl z-[60] flex justify-between items-center p-1.5 px-4 pointer-events-auto">
       {navItems.map(({ icon: Icon, href, label }) => {
         const active = pathname === href;
         return (
@@ -25,14 +25,14 @@ export default function BottomNav() {
             href={href}
             className={`p-4 rounded-2xl transition-all duration-300 relative group ${
               active
-                ? 'text-black bg-black/5'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-black/5'
+                ? 'text-accent'
+                : 'text-muted hover:text-ink'
             }`}
             aria-label={label}
           >
-            <Icon size={24} strokeWidth={active ? 2.5 : 2} />
+            <Icon size={23} strokeWidth={active ? 2.5 : 2} />
             {active && (
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-black rounded-full" />
+              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full" />
             )}
           </Link>
         );

@@ -23,78 +23,68 @@ const generateWeekStacks = (baseDate, articles) => {
   return stacks;
 };
 
-// ─── Reusable card grid — masonry of rich cards (matches Search / Archive) ───
-const DayGrid = ({ articles, onArticleClick }) => (
-  <div className="w-full flex justify-center px-4 pb-16">
-    <div className="w-full max-w-[340px] md:max-w-[704px] xl:max-w-[1068px]">
-      <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
-        {articles.map((a, i) => (
-          <FadeInCard key={a._id || a.id || i} index={i} onClick={() => onArticleClick(a)}>
-            <div className="pointer-events-none h-full w-full">
-              <CardContent data={a} />
-            </div>
-          </FadeInCard>
-        ))}
-      </div>
+// ─── Editorial single-column list (index 0 = hero) ───────────────────────────
+const EditorialList = ({ articles, onArticleClick }) => (
+  <div className="w-full flex justify-center px-4">
+    <div className="w-full max-w-[640px] flex flex-col gap-4">
+      {articles.map((a, i) => (
+        <FadeInCard key={a._id || a.id || i} index={i} onClick={() => onArticleClick(a)}>
+          <div className="pointer-events-none h-full w-full">
+            <CardContent data={a} featured={i === 0} />
+          </div>
+        </FadeInCard>
+      ))}
     </div>
   </div>
 );
 
-// ─── Day layout — header + card grid, used for opened stacks ───
-const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
-  const tags = [...new Set(articles.map(a => a.tag || a.category).filter(Boolean))];
+// ─── Editorial masthead ──────────────────────────────────────────────────────
+const Masthead = ({ kicker, date, count }) => (
+  <div className="max-w-[640px] mx-auto px-4 pt-16 pb-7">
+    <div className="flex items-center justify-between">
+      <span className="font-serif text-xl font-semibold tracking-tight">Debrief</span>
+      {count != null && <span className="meta">{count} brief{count === 1 ? '' : 'er'}</span>}
+    </div>
+    <div className="h-px bg-line-strong my-4" />
+    <p className="kicker mb-2">{kicker}</p>
+    <h1 className="font-serif text-[2.25rem] md:text-[2.75rem] leading-[1.02] tracking-tight capitalize">
+      {date}
+    </h1>
+  </div>
+);
 
+// ─── Day layout — header + list, used for opened stacks ──────────────────────
+const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
   const dateLabel = date.toLocaleDateString('sv-SE', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
   return (
-    <div className="min-h-screen bg-[#46423f] text-[#f6f4f1]">
-
-      {/* ── Header ───────────────────────────────────────────────── */}
-      <header className="px-5 md:px-10 pt-8 pb-6">
+    <div className="min-h-screen bg-bg text-ink">
+      <div className="max-w-[640px] mx-auto px-4 pt-7">
         {onClose && (
           <button
             onClick={onClose}
-            className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-white/50 hover:text-[#f6f4f1] transition-colors mb-6 group"
+            className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-muted hover:text-ink transition-colors mb-5 group"
           >
             <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
             Tillbaka
           </button>
         )}
-
-        <div className="max-w-[1068px] mx-auto">
-          <div className="flex items-end justify-between gap-4 mb-3">
-            <h1 className="font-serif text-[2.5rem] md:text-[3.75rem] leading-none tracking-tight capitalize text-[#f6f4f1]">
-              {dateLabel}
-            </h1>
-            <span className="text-[12px] text-white/40 shrink-0 hidden md:block pb-1">
-              {articles.length} artiklar
-            </span>
-          </div>
-
-          {/* Tag chips */}
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mb-1">
-              {tags.map(tag => (
-                <span key={tag} className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#50c878]">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="h-px bg-white/15 mt-4" />
-        </div>
-      </header>
+        <p className="kicker mb-2">Dagsnummer</p>
+        <h1 className="font-serif text-[2rem] md:text-[2.75rem] leading-[1.04] tracking-tight capitalize">
+          {dateLabel}
+        </h1>
+        <div className="h-px bg-line-strong mt-5" />
+      </div>
 
       {articles.length === 0 ? (
-        <div className="px-5 py-20 text-center text-white/40">
+        <div className="px-5 py-20 text-center text-muted">
           Inga artiklar publicerade denna dag.
         </div>
       ) : (
-        <main className="pt-4">
-          <DayGrid articles={articles} onArticleClick={onArticleClick} />
+        <main className="pt-6 pb-24">
+          <EditorialList articles={articles} onArticleClick={onArticleClick} />
         </main>
       )}
     </div>
@@ -108,11 +98,9 @@ const DailyStackNode = ({ stack, onOpen }) => {
   return (
     <div className="flex flex-col items-center justify-center p-6 py-16 min-h-[80vh] relative snap-center">
       <div className="absolute top-16 left-0 right-0 p-6 flex justify-center items-start pointer-events-none z-20">
-        <div className="text-center drop-shadow-md">
-          <h2 className="text-[11px] font-bold text-white/50 uppercase tracking-widest mb-2 font-sans">
-            Dagens Samling
-          </h2>
-          <h1 className="text-4xl font-serif text-[#f6f4f1] capitalize leading-none">
+        <div className="text-center">
+          <h2 className="kicker mb-2">Dagens Samling</h2>
+          <h1 className="text-4xl font-serif text-ink capitalize leading-none">
             {stack.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
           </h1>
         </div>
@@ -146,10 +134,10 @@ const DailyStackNode = ({ stack, onOpen }) => {
                 hovered: { y: hoverYOffset, x: hoverXOffset, scale: isFront ? 1.02 : scale + 0.02, rotateZ: hoverRotate }
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`absolute top-0 left-0 w-full h-full rounded-[2.5rem] shadow-2xl overflow-hidden ${isFront ? 'z-50' : 'pointer-events-none'}`}
+              className={`absolute top-0 left-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden ${isFront ? 'z-50' : 'pointer-events-none'}`}
               style={{ zIndex, transformOrigin: 'bottom center' }}
             >
-              <div className="w-full h-full pointer-events-none bg-[#f6f4f1]">
+              <div className="w-full h-full pointer-events-none bg-card">
                 <CardContent data={article} />
               </div>
               {!isFront && (
@@ -165,11 +153,11 @@ const DailyStackNode = ({ stack, onOpen }) => {
       </motion.div>
 
       <div className="text-center z-10 px-6 max-w-md mx-auto mt-6 pointer-events-none flex flex-col items-center gap-6">
-        <p className="text-[#f6f4f1]/70 font-sans text-sm leading-relaxed line-clamp-2">
+        <p className="text-dek font-sans text-sm leading-relaxed line-clamp-2">
           {stack.articles.length} artiklar · {[...new Set(stack.articles.map(a => a.tag || a.category).filter(Boolean))].slice(0, 3).join(', ')}
         </p>
         <button
-          className="bg-[#f6f4f1]/10 backdrop-blur-md px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase text-[#f6f4f1] border border-[#f6f4f1]/20 shadow-sm font-sans mx-auto transition-all pointer-events-auto hover:bg-[#f6f4f1]/20"
+          className="bg-card px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase text-ink border border-line shadow-sm font-sans mx-auto transition-all pointer-events-auto hover:bg-surface"
           onClick={() => onOpen(stack)}
         >
           Öppna dagsnummer →
@@ -208,10 +196,10 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
 
   if (loading || weekStacks.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#46423f]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-bg">
         <div className="animate-pulse space-y-4 flex flex-col items-center">
-          <div className="w-16 h-16 bg-[#605c59] rounded-full" />
-          <p className="text-white/50 font-sans tracking-widest text-xs uppercase">Laddar sammanfattning</p>
+          <div className="w-16 h-16 bg-surface rounded-full" />
+          <p className="text-muted font-sans tracking-widest text-xs uppercase">Laddar sammanfattning</p>
         </div>
       </div>
     );
@@ -227,33 +215,28 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
             key="stack-timeline-view"
             ref={containerRef}
             onScroll={handleScroll}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 z-20 bg-[#46423f] overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar"
+            exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 z-20 bg-bg overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar"
           >
             <div className="pb-32">
 
-              {/* Today — card grid inline ───────────────────────────────── */}
+              {/* Today — editorial list ─────────────────────────────────── */}
               {weekStacks.length > 0 && (
-                <div className="border-b border-white/10 pb-12">
-                  {/* Dark masthead */}
-                  <div className="bg-gradient-to-b from-black/30 to-transparent px-5 md:px-10 pt-14 pb-10 text-center">
-                    <p className="text-[11px] font-bold text-[#50c878] uppercase tracking-[0.25em] mb-3 font-sans">
-                      Dagens Översikt
-                    </p>
-                    <h1 className="text-[2.75rem] md:text-[4rem] font-serif text-[#f6f4f1] capitalize leading-none tracking-tight">
-                      {weekStacks[0].date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    </h1>
-                  </div>
-
+                <div className="border-b border-line pb-12">
+                  <Masthead
+                    kicker="Dagens Översikt"
+                    date={weekStacks[0].date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    count={weekStacks[0].articles.length}
+                  />
                   {weekStacks[0].articles.length === 0 ? (
-                    <div className="px-5 py-16 text-center text-white/40">
+                    <div className="px-5 py-16 text-center text-muted">
                       Inga artiklar publicerade idag.
                     </div>
                   ) : (
-                    <DayGrid articles={weekStacks[0].articles} onArticleClick={setActiveArticle} />
+                    <EditorialList articles={weekStacks[0].articles} onArticleClick={setActiveArticle} />
                   )}
                 </div>
               )}
@@ -265,15 +248,15 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
 
               {/* Load more ────────────────────────────────────────────── */}
               <div className="min-h-[40vh] flex flex-col items-center justify-center p-8 mt-12">
-                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                  <Layers className="text-white/40" size={32} />
+                <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-6">
+                  <Layers className="text-muted" size={32} />
                 </div>
-                <h2 className="font-serif text-3xl text-[#f6f4f1] mb-2">Slutet av veckan</h2>
-                <p className="text-white/50 font-sans text-center max-w-sm mb-8">
+                <h2 className="font-serif text-3xl text-ink mb-2">Slutet av veckan</h2>
+                <p className="text-muted font-sans text-center max-w-sm mb-8">
                   Du har nått slutet av de senaste 7 dagarnas händelser.
                 </p>
                 <button
-                  className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-full text-sm font-bold text-[#f6f4f1] border border-white/20 font-sans hover:bg-white/20 transition-colors"
+                  className="bg-card px-6 py-3 rounded-full text-sm font-bold text-ink border border-line font-sans hover:bg-surface transition-colors"
                   onClick={onLoadPreviousDay}
                 >
                   Ladda föregående vecka
@@ -283,7 +266,7 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
           </motion.div>
 
         ) : (
-          /* ── Opened day — full magazine spread ─────────────────────────── */
+          /* ── Opened day — full editorial spread ────────────────────────── */
           <motion.div
             key="grid-view"
             initial={{ opacity: 0, y: 80, scale: 0.97 }}

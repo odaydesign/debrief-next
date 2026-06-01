@@ -126,11 +126,11 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
     };
 
     return (
-        <div className="min-h-screen bg-[#46423f] pt-4 animate-in fade-in duration-500 overflow-y-auto">
-            <header className="sticky top-0 left-0 right-0 z-30 bg-gradient-to-b from-[#46423f]/95 via-[#46423f]/90 to-transparent backdrop-blur-[2px] pt-6 pb-2 px-6 md:px-8 mb-6 pointer-events-none">
+        <div className="min-h-screen bg-bg pt-4 animate-in fade-in duration-500 overflow-y-auto">
+            <header className="sticky top-0 left-0 right-0 z-30 bg-gradient-to-b from-bg/95 via-bg/90 to-transparent backdrop-blur-[2px] pt-6 pb-2 px-6 md:px-8 mb-6 pointer-events-none">
                 <div className="max-w-[1600px] mx-auto pointer-events-auto">
-                    <h1 className="text-3xl md:text-4xl font-serif text-[#f6f4f1] drop-shadow-md tracking-tight mb-2">Sparat & Bundles</h1>
-                    <p className="text-sm text-white/50 font-sans mb-8">Dina bokmärken och smarta tag-kombinationer.</p>
+                    <h1 className="text-3xl md:text-4xl font-serif text-ink drop-shadow-md tracking-tight mb-2">Sparat & Bundles</h1>
+                    <p className="text-sm text-muted font-sans mb-8">Dina bokmärken och smarta tag-kombinationer.</p>
 
                     {/* Bundle Navigation Tabs */}
                     <div className="flex overflow-x-auto no-scrollbar gap-3 pb-4 mb-2">
@@ -138,8 +138,8 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                             onClick={() => setSelectedBundle(null)}
                             className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all border
                             ${selectedBundle === null
-                                    ? 'bg-white text-[#1a1818] border-white shadow-lg'
-                                    : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'}`}
+                                    ? 'bg-ink text-bg border-ink shadow-lg'
+                                    : 'bg-card text-dek border-line hover:bg-surface'}`}
                         >
                             <Bookmark size={16} className={selectedBundle === null ? 'fill-current' : ''} />
                             Alla Bokmärken
@@ -151,8 +151,8 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                                     onClick={() => setSelectedBundle(bundle)}
                                     className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition-all border
                                     ${selectedBundle?._id === bundle._id
-                                            ? 'bg-[#50c878] text-[#1a1818] border-[#50c878] shadow-lg shadow-[#50c878]/20'
-                                            : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'}`}
+                                            ? 'bg-accent text-accent-ink border-accent shadow-lg shadow-accent/20'
+                                            : 'bg-card text-dek border-line hover:bg-surface'}`}
                                 >
                                     <FolderHeart size={16} className={selectedBundle?._id === bundle._id ? 'fill-current opacity-20' : ''} />
                                     {bundle.name}
@@ -174,15 +174,15 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
             {selectedBundle && (
                 <div className="max-w-[1600px] mx-auto px-6 md:px-8 mb-6 animate-in slide-in-from-top-2">
                     <div className="flex flex-wrap gap-2 items-center">
-                        <span className="text-xs font-bold text-white/40 uppercase tracking-widest mr-2">Taggar:</span>
+                        <span className="text-xs font-bold text-muted uppercase tracking-widest mr-2">Taggar:</span>
                         {selectedBundle.tags.map(t => (
-                            <span key={t} className="bg-white/10 text-[#f6f4f1] px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1">
-                                <Tag size={10} className="text-[#50c878]" /> {t}
+                            <span key={t} className="bg-card text-ink px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1">
+                                <Tag size={10} className="text-accent" /> {t}
                             </span>
                         ))}
                         <button
                             onClick={openEditModal}
-                            className="ml-auto flex items-center gap-2 text-xs font-bold text-white/50 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-full border border-white/10 hover:border-white/20"
+                            className="ml-auto flex items-center gap-2 text-xs font-bold text-muted hover:text-ink transition-colors bg-card px-3 py-1.5 rounded-full border border-line hover:border-line"
                         >
                             <Edit2 size={12} /> Redigera
                         </button>
@@ -192,24 +192,24 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
 
             <main className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pb-32">
                 {displayArticles.length === 0 ? (
-                    <div className="text-center py-20 text-white/40 bg-white/5 rounded-[2.5rem] border border-white/10 mx-2">
+                    <div className="text-center py-20 text-muted bg-card rounded-[2.5rem] border border-line mx-2">
                         {selectedBundle ? (
                             <>
                                 <FolderHeart size={48} className="mx-auto mb-4 opacity-20" />
-                                <p className="font-serif text-xl mb-2 text-white">Inga artiklar i denna bundle</p>
+                                <p className="font-serif text-xl mb-2 text-ink">Inga artiklar i denna bundle</p>
                                 <p className="text-sm font-sans px-8">När nya artiklar publiceras med taggarna ovan kommer de automatiskt att dyka upp här.</p>
                             </>
                         ) : (
                             <>
                                 <Bookmark size={48} className="mx-auto mb-4 opacity-20" />
-                                <p className="font-serif text-xl mb-2 text-white">Inga bokmärken</p>
+                                <p className="font-serif text-xl mb-2 text-ink">Inga bokmärken</p>
                                 <p className="text-sm font-sans px-8">Klicka på bokmärkesikonen på en artikel för att spara den här.</p>
                             </>
                         )}
                     </div>
                 ) : (
                     <>
-                        <p className="px-2 text-xs font-bold text-white/30 uppercase tracking-widest mb-6">
+                        <p className="px-2 text-xs font-bold text-faint uppercase tracking-widest mb-6">
                             {displayArticles.length} {selectedBundle ? 'i denna bundle' : 'sparade artiklar'}
                         </p>
                         <div className="w-full flex justify-center px-4">
@@ -253,36 +253,36 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-[#2a2726]/80 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                             onClick={() => setIsEditingBundle(false)}
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="relative bg-[#1a1818] rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden text-[#f6f4f1] border border-white/10"
+                            className="relative bg-card rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden text-ink border border-line"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-white/10">
-                                <h2 className="text-sm font-bold uppercase tracking-widest text-[#50c878] flex items-center gap-2">
+                            <div className="flex justify-between items-center p-6 border-b border-line">
+                                <h2 className="text-sm font-bold uppercase tracking-widest text-accent flex items-center gap-2">
                                     <Edit2 size={16} /> Redigera Bundle
                                 </h2>
-                                <button onClick={() => setIsEditingBundle(false)} className="text-white/50 hover:text-white transition-colors">
+                                <button onClick={() => setIsEditingBundle(false)} className="text-muted hover:text-ink transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
                             <form onSubmit={handleUpdateBundle} className="p-6">
                                 <div className="mb-6">
-                                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2 block">Namnge din Bundle</label>
+                                    <label className="text-xs font-bold text-muted uppercase tracking-widest mb-2 block">Namnge din Bundle</label>
                                     <input
                                         type="text"
                                         required
                                         value={editBundleName}
                                         onChange={(e) => setEditBundleName(e.target.value)}
-                                        className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#50c878] text-white placeholder-white/20"
+                                        className="w-full bg-black/30 border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-ink placeholder:text-faint"
                                     />
                                 </div>
 
-                                <label className="text-xs font-bold text-white/50 uppercase tracking-widest mb-3 block">Valda Taggar</label>
+                                <label className="text-xs font-bold text-muted uppercase tracking-widest mb-3 block">Valda Taggar</label>
                                 <div className="flex flex-wrap gap-2 mb-8 max-h-32 overflow-y-auto custom-scrollbar">
                                     {allAvailableTags.map(tag => {
                                         const isSelected = editBundleTags.includes(tag);
@@ -293,11 +293,11 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                                                 onClick={() => toggleEditTag(tag)}
                                                 className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all flex items-center gap-1.5 border
                                                 ${isSelected
-                                                        ? 'bg-[#50c878] border-[#50c878] text-[#1a1818]'
-                                                        : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
+                                                        ? 'bg-accent border-accent text-accent-ink'
+                                                        : 'bg-card border-line text-dek hover:bg-surface hover:border-line'
                                                     }`}
                                             >
-                                                <Tag size={10} className={isSelected ? 'text-[#1a1818]/70' : 'text-white/40'} />
+                                                <Tag size={10} className={isSelected ? 'text-accent-ink/70' : 'text-muted'} />
                                                 {tag}
                                             </button>
                                         );
@@ -306,7 +306,7 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                                 <button
                                     type="submit"
                                     disabled={!editBundleName.trim() || editBundleTags.length === 0}
-                                    className="w-full bg-[#50c878] text-[#1a1818] font-bold py-3 rounded-xl hover:bg-[#43a865] transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs"
+                                    className="w-full bg-accent text-accent-ink font-bold py-3 rounded-xl hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs"
                                 >
                                     Spara Ändringar
                                 </button>

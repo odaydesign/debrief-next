@@ -10,7 +10,7 @@ const ArchiveStackNode = ({ label, articles, onOpen }) => {
 
     return (
         <motion.div
-            className="flex flex-col items-center justify-start p-4 bg-white/5 rounded-3xl border border-white/10 cursor-pointer group hover:bg-white/10 transition-colors"
+            className="flex flex-col items-center justify-start p-4 bg-card rounded-3xl border border-line cursor-pointer group hover:bg-surface transition-colors"
             onClick={() => onOpen({ label, articles })}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -63,7 +63,7 @@ const ArchiveStackNode = ({ label, articles, onOpen }) => {
                             className={`absolute top-0 left-0 w-full h-full rounded-2xl shadow-xl overflow-hidden ${isFront ? 'z-50' : 'pointer-events-none'}`}
                             style={{ zIndex, transformOrigin: "bottom center" }}
                         >
-                            <div className="w-full h-full pointer-events-none text-[8px] bg-[#f6f4f1]">
+                            <div className="w-full h-full pointer-events-none text-[8px] bg-card">
                                 <CardContent data={article} />
                             </div>
                             {!isFront && (
@@ -78,17 +78,17 @@ const ArchiveStackNode = ({ label, articles, onOpen }) => {
                                 />
                             )}
                             {/* Optional glass overlay to make it look intentionally archived */}
-                            <div className="absolute inset-0 bg-[#46423f]/10 pointer-events-none mix-blend-overlay"></div>
+                            <div className="absolute inset-0 bg-bg/10 pointer-events-none mix-blend-overlay"></div>
                         </motion.div>
                     );
                 })}
             </motion.div>
             <div className="text-center w-full px-2">
-                <h3 className="text-[#f6f4f1] font-serif text-xl mb-1 tracking-tight capitalize truncate px-2">{label}</h3>
-                <p className="text-[#f6f4f1]/60 font-sans text-xs mb-3">
+                <h3 className="text-ink font-serif text-xl mb-1 tracking-tight capitalize truncate px-2">{label}</h3>
+                <p className="text-muted font-sans text-xs mb-3">
                     {articles.length} Artiklar
                 </p>
-                <button className="w-full bg-[#f6f4f1]/10 backdrop-blur-md py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase text-[#f6f4f1] border border-[#f6f4f1]/20 font-sans group-hover:bg-[#f6f4f1]/20 transition-colors">
+                <button className="w-full bg-card backdrop-blur-md py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase text-ink border border-line font-sans group-hover:bg-surface transition-colors">
                     Visa samling
                 </button>
             </div>
@@ -145,7 +145,7 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
     };
 
     return (
-        <div className="w-full relative min-h-screen overflow-hidden bg-[#46423f]">
+        <div className="w-full relative min-h-screen overflow-hidden bg-bg">
             <AnimatePresence mode="wait">
                 {!openGroup ? (
                     <motion.div
@@ -159,17 +159,17 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
                         className="absolute inset-0 z-20 overflow-y-auto pb-32 pt-12 px-4 md:px-8 custom-scrollbar"
                     >
                         <header className="mb-10 text-center">
-                            <h1 className="text-4xl font-serif text-[#f6f4f1] tracking-tight mb-2 drop-shadow-sm">Arkivbibliotek</h1>
-                            <p className="text-[#f6f4f1]/60 font-sans text-sm mb-8">Utforska tidigare samlingar av insikter.</p>
+                            <h1 className="text-4xl font-serif text-ink tracking-tight mb-2 drop-shadow-sm">Arkivbibliotek</h1>
+                            <p className="text-muted font-sans text-sm mb-8">Utforska tidigare samlingar av insikter.</p>
 
-                            <div className="flex bg-black/20 p-1.5 rounded-full backdrop-blur-md w-full max-w-sm mx-auto border border-white/5">
+                            <div className="flex bg-black/20 p-1.5 rounded-full backdrop-blur-md w-full max-w-sm mx-auto border border-line">
                                 {['dag', 'vecka', 'månad'].map(m => (
                                     <button
                                         key={m}
                                         onClick={() => setMode(m)}
                                         className={`flex-1 py-2 text-[11px] tracking-widest font-bold rounded-full uppercase transition-all duration-300 ${mode === m
-                                            ? 'bg-[#f6f4f1] text-[#46423f] shadow-md'
-                                            : 'text-white/50 hover:text-[#f6f4f1]'
+                                            ? 'bg-ink text-bg shadow-md'
+                                            : 'text-muted hover:text-ink'
                                             }`}
                                     >
                                         {m === 'dag' ? 'Dag' : m === 'vecka' ? 'Vecka' : 'Månad'}
@@ -191,7 +191,7 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
                         </div>
 
                         {groups.length === 0 && (
-                            <div className="text-center text-white/40 mt-20 font-sans text-sm">
+                            <div className="text-center text-muted mt-20 font-sans text-sm">
                                 Inga artiklar hittades för denna gruppering.
                             </div>
                         )}
@@ -203,20 +203,20 @@ const ArchiveView = ({ articles, setActiveArticle }) => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 50, scale: 0.95 }}
                         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute inset-0 z-30 bg-[#46423f] overflow-y-auto"
+                        className="absolute inset-0 z-30 bg-bg overflow-y-auto"
                     >
                         {/* Sticky Header for the grid view */}
-                        <div className="sticky top-0 left-0 right-0 p-6 md:p-8 z-30 bg-gradient-to-b from-[#46423f]/90 to-transparent backdrop-blur-[2px] pointer-events-none flex justify-between items-start pt-6 md:pt-10">
+                        <div className="sticky top-0 left-0 right-0 p-6 md:p-8 z-30 bg-gradient-to-b from-bg/90 to-transparent backdrop-blur-[2px] pointer-events-none flex justify-between items-start pt-6 md:pt-10">
                             <div>
-                                <h2 className="text-[11px] font-bold text-white/50 uppercase tracking-widest mb-1 font-sans drop-shadow-md">
+                                <h2 className="text-[11px] font-bold text-muted uppercase tracking-widest mb-1 font-sans drop-shadow-md">
                                     Arkivsamling
                                 </h2>
-                                <h1 className="text-3xl md:text-4xl font-serif text-[#f6f4f1] drop-shadow-md tracking-tight capitalize">
+                                <h1 className="text-3xl md:text-4xl font-serif text-ink drop-shadow-md tracking-tight capitalize">
                                     {openGroup.label}
                                 </h1>
                             </div>
                             <button
-                                className="bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full text-xs font-bold text-[#f6f4f1] border border-white/20 shadow-sm font-sans pointer-events-auto cursor-pointer hover:bg-white/20 hover:-translate-y-0.5 transition-all shadow-lg shadow-black/20"
+                                className="bg-card backdrop-blur-md px-5 py-2.5 rounded-full text-xs font-bold text-ink border border-line shadow-sm font-sans pointer-events-auto cursor-pointer hover:bg-surface hover:-translate-y-0.5 transition-all shadow-lg shadow-black/20"
                                 onClick={() => setOpenGroup(null)}
                             >
                                 Tillbaka till arkivet
