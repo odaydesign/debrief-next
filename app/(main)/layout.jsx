@@ -5,7 +5,6 @@ import ArticleOverlay from "@/components/ArticleOverlay";
 import BottomNav from "@/components/BottomNav";
 import AccountButton from "@/components/AccountButton";
 import ThemeToggle from "@/components/ThemeToggle";
-import ProximityFX from "@/components/ProximityFX";
 
 function MainLayoutInner({ children }) {
   const { activeArticle, isOverlayOpen, closeOverlay } = useMain();
@@ -24,9 +23,6 @@ function MainLayoutInner({ children }) {
           {children}
         </main>
       </div>
-
-      {/* Proximity hover effects (magnetic buttons/nav) */}
-      <ProximityFX />
 
       {/* Floating controls */}
       <ThemeToggle />
