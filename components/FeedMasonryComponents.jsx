@@ -35,10 +35,18 @@ export const FadeInCard = ({ children, index, onClick }) => {
 
     const delay = !hasEntered && index < 10 ? `${(index % 5) * 70}ms` : '0ms';
 
+    // cursor spotlight — track pointer position as CSS vars (desktop only)
+    const onGlow = (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+        e.currentTarget.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+    };
+
     return (
         <div ref={ref} className="break-inside-avoid mb-4">
             <div
                 onClick={onClick}
+                onMouseMove={onGlow}
                 className="will-change-transform cursor-pointer"
                 style={{
                     opacity: isVisible ? 1 : 0,
@@ -47,8 +55,9 @@ export const FadeInCard = ({ children, index, onClick }) => {
                     transitionDelay: delay,
                 }}
             >
-                <div className="transition-transform duration-200 active:scale-[0.985] md:hover:-translate-y-1 h-full">
+                <div className="prox-card transition-transform duration-200 active:scale-[0.985] md:hover:-translate-y-1 h-full">
                     {children}
+                    <div className="prox-glow" aria-hidden="true" />
                 </div>
             </div>
         </div>
