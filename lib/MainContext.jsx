@@ -35,7 +35,7 @@ export function formatArticles(rawArticles, interactions) {
       isBookmarked: interaction?.isBookmarked || false,
       isRead: interaction?.isRead || false,
       readTime: calculateReadTime(a.content),
-      author: 'Debrief AI'
+      author: a.author || 'Debrief AI'
     };
   });
 }

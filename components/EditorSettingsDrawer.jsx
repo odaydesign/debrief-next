@@ -7,15 +7,40 @@ import { CardContent } from './FeedMasonryComponents';
 import FileUploadButton from './FileUploadButton';
 
 const TEMPLATES = [
-    { id: 'news', name: 'Standard', icon: '📰', defaultProps: { type: 'news', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]', buttonText: 'LÄS MER' } },
-    { id: 'quote', name: 'Citat', icon: '💬', defaultProps: { type: 'news', bgColor: 'bg-[#b8a30e]', textColor: 'text-white', fontSize: 'text-2xl font-serif italic' } },
-    { id: 'youtube', name: 'YouTube', icon: '▶️', defaultProps: { type: 'youtube', bgColor: 'bg-[#ff0000]', textColor: 'text-white', icon: 'Play', buttonText: 'TITTA NU' } },
-    { id: 'twitter', name: 'X/Twitter', icon: '𝕏', defaultProps: { type: 'twitter', bgColor: 'bg-[#15202b]', textColor: 'text-white', icon: 'Twitter', buttonText: 'LÄS TRÅD' } },
-    { id: 'book', name: 'Bok', icon: '📚', defaultProps: { type: 'book', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]', buttonText: 'LÄS BOKEN' } },
-    { id: 'document', name: 'Dokument', icon: '📄', defaultProps: { type: 'document', bgColor: 'bg-[#2a2726]', textColor: 'text-white', icon: 'File', buttonText: 'LADDA NER' } },
+    { id: 'news', name: 'Artikel', icon: '📰', defaultProps: { type: 'news', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]', buttonText: 'LÄS MER' } },
+    { id: 'youtube', name: 'YouTube', icon: '▶️', defaultProps: { type: 'youtube', bgColor: 'bg-[#ff0000]', textColor: 'text-white', buttonText: 'TITTA NU' } },
+    { id: 'media', name: 'Video', icon: '🎬', defaultProps: { type: 'media', bgColor: 'bg-[#2a2726]', textColor: 'text-white' } },
+    { id: 'book', name: 'Bok', icon: '📚', defaultProps: { type: 'book', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]' } },
+    { id: 'document', name: 'PDF / Fil', icon: '📄', defaultProps: { type: 'document', bgColor: 'bg-[#2a2726]', textColor: 'text-white' } },
+    { id: 'quote', name: 'Citat', icon: '💬', defaultProps: { type: 'quote', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]' } },
+    { id: 'stat', name: 'Siffra', icon: '🔢', defaultProps: { type: 'stat', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]' } },
+    { id: 'link', name: 'Länk', icon: '🔗', defaultProps: { type: 'link', bgColor: 'bg-[#f6f4f1]', textColor: 'text-[#2a2726]' } },
+    { id: 'podcast', name: 'Podd', icon: '🎙️', defaultProps: { type: 'podcast', bgColor: 'bg-[#2a2726]', textColor: 'text-white' } },
+    { id: 'twitter', name: 'X/Twitter', icon: '𝕏', defaultProps: { type: 'twitter', bgColor: 'bg-[#15202b]', textColor: 'text-white', buttonText: 'LÄS TRÅD' } },
     { id: 'map', name: 'Karta', icon: '📍', defaultProps: { type: 'map', bgColor: 'bg-[#2a2726]', textColor: 'text-white' } },
-    { id: 'media', name: 'Media', icon: '🎬', defaultProps: { type: 'media', bgColor: 'bg-[#3ab065]', textColor: 'text-white', icon: 'Play' } },
 ];
+
+// Module-level field helpers (defined outside the component so inputs don't
+// remount on each keystroke — which would drop focus).
+function DField({ label, name, value, onChange, placeholder, mono }) {
+    return (
+        <div>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1.5">{label}</label>
+            <input
+                name={name} value={value || ''} onChange={onChange} placeholder={placeholder}
+                className={`w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#50c878] ${mono ? 'font-mono' : ''}`}
+            />
+        </div>
+    );
+}
+function ColorField({ label, value, onChange }) {
+    return (
+        <div className="flex-1">
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1.5">{label}</label>
+            <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-full h-10 rounded-xl bg-white/5 border border-white/10 cursor-pointer" />
+        </div>
+    );
+}
 
 const COLORS = [
     { id: 'light', hex: '#f6f4f1', class: 'bg-[#f6f4f1]' },
@@ -164,6 +189,67 @@ const EditorSettingsDrawer = ({ isOpen, onClose, formData, onFormChange, activeT
                                 </section>
                             )}
 
+                            {/* Type-specific details */}
+                            {['book', 'document', 'pdf', 'file', 'youtube', 'video', 'media', 'podcast', 'stat', 'link'].includes(formData.type) && (
+                                <section>
+                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3 flex items-center gap-2">
+                                        <Type size={12} /> Typdetaljer
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {formData.type === 'book' && (
+                                            <>
+                                                <DField label="Författare" name="author" value={formData.author} onChange={handleChange} placeholder="Morgan Housel" />
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <DField label="Genre" name="genre" value={formData.genre} onChange={handleChange} placeholder="Ekonomi" />
+                                                    <DField label="Omfång" name="time" value={formData.time} onChange={handleChange} placeholder="320 sid" />
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <ColorField label="Omslag 1" value={formData.c1 || '#6e4a3a'} onChange={(v) => onFormChange('c1', v)} />
+                                                    <ColorField label="Omslag 2" value={formData.c2 || '#3a2620'} onChange={(v) => onFormChange('c2', v)} />
+                                                </div>
+                                            </>
+                                        )}
+                                        {(formData.type === 'document' || formData.type === 'pdf' || formData.type === 'file') && (
+                                            <>
+                                                <DField label="Filnamn" name="fname" value={formData.fname} onChange={handleChange} placeholder="rapport.pdf" mono />
+                                                <div className="grid grid-cols-3 gap-3">
+                                                    <DField label="Typ" name="filetype" value={formData.filetype} onChange={handleChange} placeholder="PDF" />
+                                                    <DField label="Storlek" name="filesize" value={formData.filesize} onChange={handleChange} placeholder="4,2 MB" />
+                                                    <DField label="Sidor" name="pages" value={formData.pages} onChange={handleChange} placeholder="48" />
+                                                </div>
+                                            </>
+                                        )}
+                                        {(formData.type === 'youtube' || formData.type === 'video' || formData.type === 'media') && (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <DField label="Kanal" name="channel" value={formData.channel} onChange={handleChange} placeholder="Ben Thompson" />
+                                                <DField label="Längd" name="dur" value={formData.dur} onChange={handleChange} placeholder="18:24" />
+                                            </div>
+                                        )}
+                                        {formData.type === 'podcast' && (
+                                            <>
+                                                <DField label="Program" name="show" value={formData.show} onChange={handleChange} placeholder="Lenny's Podcast" />
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <DField label="Avsnitt" name="ep" value={formData.ep} onChange={handleChange} placeholder="Avs. 218" />
+                                                    <DField label="Längd" name="dur" value={formData.dur} onChange={handleChange} placeholder="52:10" />
+                                                </div>
+                                            </>
+                                        )}
+                                        {formData.type === 'stat' && (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <DField label="Siffra" name="big" value={formData.big} onChange={handleChange} placeholder="31%" />
+                                                <DField label="Enhet / etikett" name="unit" value={formData.unit} onChange={handleChange} placeholder="av arbetstiden" />
+                                            </div>
+                                        )}
+                                        {formData.type === 'link' && (
+                                            <>
+                                                <DField label="Domän" name="domain" value={formData.domain} onChange={handleChange} placeholder="arxiv.org" />
+                                                <DField label="URL" name="url" value={formData.url} onChange={handleChange} placeholder="https://..." mono />
+                                            </>
+                                        )}
+                                    </div>
+                                </section>
+                            )}
+
                             {/* Button Text */}
                             <section>
                                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3 flex items-center gap-2">
@@ -187,10 +273,18 @@ const EditorSettingsDrawer = ({ isOpen, onClose, formData, onFormChange, activeT
                                 <div className="space-y-3">
                                     <input
                                         type="text"
+                                        name="source"
+                                        value={formData.source}
+                                        onChange={handleChange}
+                                        placeholder="Källa / upphov (visas på kortet, t.ex. Bloomberg, Penguin)"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#50c878]"
+                                    />
+                                    <input
+                                        type="text"
                                         name="sourceText"
                                         value={formData.sourceText}
                                         onChange={handleChange}
-                                        placeholder="Källtext (t.ex. Läs originalartikeln)"
+                                        placeholder="Källänk-text (t.ex. Läs originalartikeln)"
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#50c878]"
                                     />
                                     <input

@@ -44,6 +44,25 @@ const EditorView = ({ articleToEdit, onPublish, onCancel }) => {
         sourceText: articleToEdit?.sourceText || '',
         imageFocalX: articleToEdit?.imageFocalX ?? 50,
         imageFocalY: articleToEdit?.imageFocalY ?? 50,
+        // generic attribution + per-type fields
+        source: articleToEdit?.source || '',
+        author: articleToEdit?.author || '',
+        genre: articleToEdit?.genre || '',
+        time: articleToEdit?.time || '',
+        c1: articleToEdit?.c1 || '',
+        c2: articleToEdit?.c2 || '',
+        fname: articleToEdit?.fname || '',
+        filetype: articleToEdit?.filetype || '',
+        filesize: articleToEdit?.filesize || '',
+        pages: articleToEdit?.pages || '',
+        dur: articleToEdit?.dur || '',
+        channel: articleToEdit?.channel || '',
+        show: articleToEdit?.show || '',
+        ep: articleToEdit?.ep || '',
+        big: articleToEdit?.big || '',
+        unit: articleToEdit?.unit || '',
+        domain: articleToEdit?.domain || '',
+        url: articleToEdit?.url || '',
     });
 
     const [isExtractingColor, setIsExtractingColor] = useState(false);
