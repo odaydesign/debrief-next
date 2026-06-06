@@ -30,7 +30,8 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Byt tema"
-      className="fixed top-5 right-[64px] z-[70] w-10 h-10 rounded-full bg-card border border-line shadow-lg flex items-center justify-center text-ink hover:bg-surface transition-colors active:scale-90"
+      className="fixed right-[64px] z-[70] w-10 h-10 rounded-full bg-card border border-line shadow-lg flex items-center justify-center text-ink hover:bg-surface transition-colors active:scale-90"
+      style={{ top: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
     >
       {theme === "ink" ? <Sun size={17} strokeWidth={2} /> : <Moon size={17} strokeWidth={2} />}
     </button>

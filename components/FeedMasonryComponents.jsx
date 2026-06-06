@@ -106,7 +106,7 @@ export const CardContent = ({ data, featured = false }) => {
     );
     const saveBtn = showSave ? (
         <button onClick={onSave} aria-label={saved ? 'Ta bort bokmärke' : 'Spara'}
-            className={`pointer-events-auto shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center transition-colors active:scale-90 ${saved ? 'bg-accent border-accent text-accent-ink' : 'border-line text-muted hover:text-ink'}`}>
+            className={`pointer-events-auto shrink-0 w-9 h-9 -mr-1 rounded-lg border flex items-center justify-center transition-colors active:scale-90 relative before:absolute before:inset-[-6px] before:content-[''] ${saved ? 'bg-accent border-accent text-accent-ink' : 'border-line text-muted hover:text-ink'}`}>
             <Bookmark size={14} fill={saved ? 'currentColor' : 'none'} />
         </button>
     ) : null;

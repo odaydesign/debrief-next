@@ -60,7 +60,7 @@ export default function AccountButton() {
   const initial = (displayName || email || "G").trim().charAt(0).toUpperCase();
 
   return (
-    <div ref={ref} className="fixed top-5 right-5 z-[70]">
+    <div ref={ref} className="fixed right-5 z-[70]" style={{ top: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}>
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Konto"

@@ -10,7 +10,10 @@ function MainLayoutInner({ children }) {
   const { activeArticle, isOverlayOpen, closeOverlay } = useMain();
 
   return (
-    <div className="min-h-screen bg-bg text-ink font-sans pb-24 relative">
+    <div
+      className="min-h-screen bg-bg text-ink font-sans relative"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 28px)" }}
+    >
       {/* Main Content Area */}
       <div
         className={`transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -19,7 +22,7 @@ function MainLayoutInner({ children }) {
             : 'scale-100 opacity-100'
         }`}
       >
-        <main className="pb-24">
+        <main style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 110px)" }}>
           {children}
         </main>
       </div>
