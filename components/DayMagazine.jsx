@@ -54,7 +54,7 @@ const clauseCase = (title, lead) => {
 // Build a short, sharp "today's news" summary by weaving the day's top
 // headlines into one sentence. Returns { ink, tail } for a two-tone render
 // (tail = the final clause, shown muted). Falls back gracefully.
-const summaryParts = (articles) => {
+export const summaryParts = (articles) => {
   const titles = articles.map((a) => a.title).filter(Boolean);
   if (titles.length === 0) return { ink: 'Dagens viktigaste nyheter', tail: null };
 
