@@ -98,7 +98,7 @@ export const Masthead = ({ date, articles, onBack, progress, streak }) => {
 
       <p className="kicker mb-3">Edition №{editionNo(date)} · {dateLabel}</p>
 
-      <h1 className="font-serif font-semibold text-[1.95rem] md:text-[2.6rem] leading-[1.08] tracking-tight">
+      <h1 className="font-serif font-semibold text-[1.95rem] md:text-[2.6rem] leading-[1.08] tracking-tight text-balance">
         {aiSummary
           ? aiSummary
           : <>{ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}</>}

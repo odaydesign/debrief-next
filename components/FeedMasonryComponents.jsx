@@ -122,9 +122,9 @@ export const CardContent = ({ data, featured = false }) => {
         </div>
     );
     const headline = (cls) => (
-        <h2 className={`font-serif leading-[1.14] tracking-tight mb-2 ${cls || (featured ? 'text-[1.7rem] md:text-[2.1rem]' : 'text-[1.32rem] md:text-[1.4rem]')}`}>{title}</h2>
+        <h2 className={`font-serif leading-[1.14] tracking-tight text-balance mb-2 ${cls || (featured ? 'text-[1.7rem] md:text-[2.1rem]' : 'text-[1.32rem] md:text-[1.4rem]')}`}>{title}</h2>
     );
-    const dek = (cls = 'line-clamp-3') => description ? <p className={`text-[14px] leading-relaxed text-dek ${cls}`}>{description}</p> : null;
+    const dek = (cls = 'line-clamp-3') => description ? <p className={`text-[15px] leading-[1.6] text-dek ${cls}`}>{description}</p> : null;
     const shell = (children) => (
         <article className={`relative bg-card text-ink border border-line rounded-2xl overflow-hidden h-full ${data.isMustRead ? 'must-spine' : ''}`}>
             <div className="p-4 md:p-5 flex flex-col h-full text-left">{children}</div>

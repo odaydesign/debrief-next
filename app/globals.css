@@ -71,7 +71,27 @@ html {
 }
 
 ::selection {
-    background: var(--accent-soft);
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Visible keyboard focus without affecting mouse/touch users. */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .reveal {
+        transition: none;
+        opacity: 1;
+        transform: none;
+    }
+    .hf-wave i {
+        animation: none;
+    }
 }
 
 /* ─── Editorial helpers ───────────────────────────────────────────── */
@@ -79,14 +99,14 @@ html {
     font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--accent);
 }
 
 .meta {
     font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.04em;
     color: var(--muted);
     text-transform: uppercase;
@@ -98,7 +118,7 @@ html {
     align-items: center;
     gap: 6px;
     font-family: var(--font-mono);
-    font-size: 9.5px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -193,11 +213,12 @@ html {
 .reader-body {
     font-family: var(--font-serif);
     color: var(--ink);
+    overflow-wrap: break-word;
 }
 .reader-body p {
-    font-size: 1.12rem;
-    line-height: 1.75;
-    margin: 0 0 1.25rem;
+    font-size: 1.16rem;
+    line-height: 1.78;
+    margin: 0 0 1.3rem;
     color: var(--ink);
     text-wrap: pretty;
 }
@@ -205,25 +226,86 @@ html {
 .reader-body h3 {
     font-family: var(--font-serif);
     font-weight: 600;
-    line-height: 1.2;
-    margin: 1.7rem 0 0.6rem;
+    line-height: 1.22;
+    margin: 2rem 0 0.7rem;
+    text-wrap: balance;
+}
+.reader-body h2 {
+    font-size: 1.45rem;
+    letter-spacing: -0.01em;
+}
+.reader-body h3 {
+    font-size: 1.2rem;
 }
 .reader-body a {
     color: var(--accent);
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
+}
+.reader-body a:hover {
+    text-decoration-color: var(--accent);
+}
+.reader-body strong {
+    font-weight: 600;
+    color: var(--ink);
+}
+.reader-body blockquote {
+    margin: 1.6rem 0;
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    font-style: italic;
+    color: var(--dek);
+}
+.reader-body blockquote p {
+    font-size: 1.22rem;
+    line-height: 1.6;
+    color: inherit;
+}
+.reader-body blockquote p:last-child {
+    margin-bottom: 0;
+}
+.reader-body hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 2.2rem auto;
+    width: 38%;
 }
 .reader-body ul,
 .reader-body ol {
-    margin: 0 0 1.25rem 1.2rem;
+    margin: 0 0 1.3rem 1.2rem;
+    font-size: 1.12rem;
 }
 .reader-body li {
-    margin: 0.3rem 0;
+    margin: 0.35rem 0;
     line-height: 1.7;
+}
+.reader-body li::marker {
+    color: var(--muted);
 }
 .reader-body img {
     border-radius: 12px;
     margin: 1rem 0;
+}
+.reader-body figcaption {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: -0.3rem;
+    margin-bottom: 1.3rem;
+}
+
+/* Swedish compound words overflow narrow columns — hyphenate on phones. */
+@media (max-width: 480px) {
+    .reader-body p,
+    .reader-body li {
+        -webkit-hyphens: auto;
+        hyphens: auto;
+    }
 }
 
 /* Hide scrollbar */

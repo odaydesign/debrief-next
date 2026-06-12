@@ -26,17 +26,18 @@ export default function BottomNav() {
           <Link
             key={href}
             href={href}
-            className={`p-4 rounded-2xl transition-all duration-300 relative group ${
+            className={`flex flex-col items-center gap-1 px-2.5 py-2.5 rounded-2xl transition-all duration-300 ${
               active
                 ? 'text-accent'
                 : 'text-muted hover:text-ink'
             }`}
             aria-label={label}
+            aria-current={active ? 'page' : undefined}
           >
-            <Icon size={23} strokeWidth={active ? 2.5 : 2} />
-            {active && (
-              <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full" />
-            )}
+            <Icon size={21} strokeWidth={active ? 2.5 : 2} />
+            <span className={`font-mono text-[8.5px] uppercase tracking-[0.08em] leading-none ${active ? 'font-semibold' : ''}`}>
+              {label}
+            </span>
           </Link>
         );
       })}

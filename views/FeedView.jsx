@@ -35,7 +35,7 @@ const DailyStackNode = ({ stack, onOpen }) => {
     <div className="flex flex-col items-center justify-center p-6 py-16 min-h-[80vh] relative snap-center">
       <div className="absolute top-16 left-0 right-0 p-6 flex justify-center items-start pointer-events-none z-20">
         <div className="text-center">
-          <h2 className="kicker mb-2">Dagens Samling</h2>
+          <h2 className="kicker mb-2">Tidigare nummer</h2>
           <h1 className="text-4xl font-serif text-ink capitalize leading-none">
             {stack.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
           </h1>
