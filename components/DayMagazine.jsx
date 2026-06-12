@@ -73,7 +73,9 @@ export const summaryParts = (articles) => {
 };
 
 // ─── Editorial masthead (per day) ────────────────────────────────────────────
-export const Masthead = ({ date, articles, onBack }) => {
+// `progress` ({ node }) and `streak` (number) are optional ritual add-ons used
+// by the feed's today-section; archive/admin callers omit them.
+export const Masthead = ({ date, articles, onBack, progress, streak }) => {
   const count = articles.length;
   const min = totalMinutes(articles);
   const dateLabel = date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -102,10 +104,11 @@ export const Masthead = ({ date, articles, onBack }) => {
           : <>{ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}</>}
       </h1>
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-5">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-5">
         <span className="meta">{count} {count === 1 ? 'brief' : 'briefer'}</span>
         <span className="meta">{min} min</span>
-        <span className="meta" style={{ color: 'var(--accent)' }}>Handplockat</span>
+        {progress || <span className="meta" style={{ color: 'var(--accent)' }}>Handplockat</span>}
+        {streak >= 2 && <span className="meta" style={{ color: 'var(--accent)' }}>{streak} dagar i rad</span>}
       </div>
     </div>
   );

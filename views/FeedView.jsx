@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardContent } from "@/components/FeedMasonryComponents";
 import { Masthead, EditorialList, DayMagazineLayout } from "@/components/DayMagazine";
+import { EditionProgress, EditionCompleteCard } from "@/components/EditionRitual";
+import usePullToRefresh from "@/lib/usePullToRefresh";
+import { useStreak } from "@/lib/streak";
 import { Layers } from 'lucide-react';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
@@ -130,12 +133,27 @@ const FeedSkeleton = () => (
 );
 
 // ─── Main FeedView ────────────────────────────────────────────────────────────
+const PTR_LABELS = {
+  idle: 'Dra för att uppdatera',
+  pulling: 'Dra för att uppdatera',
+  ready: 'Släpp för att uppdatera',
+  refreshing: 'Uppdaterar…',
+};
+
 const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, loading }) => {
   const [openStack, setOpenStack] = useState(null);
   const [weekStacks, setWeekStacks] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const scrollRef = React.useRef(0);
   const containerRef = React.useRef(null);
+
+  const streak = useStreak();
+  const { state: ptrState, indicatorRef } = usePullToRefresh(
+    containerRef,
+    () => setRefreshKey((k) => k + 1),
+    { disabled: !!openStack || loading }
+  );
 
   useEffect(() => {
     if (articles && articles.length > 0) {
@@ -187,23 +205,46 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 z-20 bg-bg overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar"
+            className="absolute inset-0 z-20 bg-bg overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar overscroll-y-contain"
           >
+            {/* Pull-to-refresh indicator (driven by the hook) */}
+            <div
+              ref={indicatorRef}
+              className="absolute top-0 left-0 right-0 flex justify-center pointer-events-none z-30"
+              style={{ opacity: 0, transform: 'translateY(0px)' }}
+            >
+              <div className="-mt-12 flex items-center gap-2 bg-card border border-line rounded-full px-4 py-2 shadow-lg">
+                <span className={`w-1.5 h-1.5 rounded-full bg-accent ${ptrState === 'refreshing' ? 'animate-pulse' : ''}`} />
+                <span className="kicker" style={{ color: 'var(--ink)' }}>{PTR_LABELS[ptrState]}</span>
+              </div>
+            </div>
+
             <div className="pb-32">
 
               {/* Today — editorial list ─────────────────────────────────── */}
-              {weekStacks.length > 0 && (
-                <div className="border-b border-line pb-12">
-                  <Masthead date={weekStacks[0].date} articles={weekStacks[0].articles} />
-                  {weekStacks[0].articles.length === 0 ? (
-                    <div className="px-5 py-16 text-center text-muted">
-                      Inga artiklar publicerade idag.
-                    </div>
-                  ) : (
-                    <EditorialList articles={weekStacks[0].articles} onArticleClick={setActiveArticle} />
-                  )}
-                </div>
-              )}
+              {weekStacks.length > 0 && (() => {
+                const today = weekStacks[0].articles;
+                const readCount = today.filter((a) => a.isRead).length;
+                const complete = today.length > 0 && readCount === today.length;
+                return (
+                  <div key={refreshKey} className="border-b border-line pb-12">
+                    <Masthead
+                      date={weekStacks[0].date}
+                      articles={today}
+                      progress={today.length > 0 ? <EditionProgress read={readCount} total={today.length} /> : null}
+                      streak={streak.days}
+                    />
+                    {today.length === 0 ? (
+                      <div className="px-5 py-16 text-center text-muted">
+                        Inga artiklar publicerade idag.
+                      </div>
+                    ) : (
+                      <EditorialList articles={today} onArticleClick={setActiveArticle} />
+                    )}
+                    {complete && <EditionCompleteCard streak={streak.days} />}
+                  </div>
+                );
+              })()}
 
               {/* Past days — clickable card stacks ─────────────────────── */}
               {weekStacks.slice(1).map((stack) => (
