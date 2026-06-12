@@ -10,6 +10,7 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
     const scrollRef = useRef(null);
     const panelRef = useRef(null);
     const backdropRef = useRef(null);
+    const progressRef = useRef(null);
     const onCloseRef = useRef(onClose);
     const main = useMainOptional();
 
@@ -44,11 +45,34 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
             if (scrollRef.current) scrollRef.current.scrollTop = 0;
             if (panelRef.current) { panelRef.current.classList.remove('sheet-dragging'); panelRef.current.style.transform = ''; }
             if (backdropRef.current) backdropRef.current.style.opacity = '';
+            if (progressRef.current) progressRef.current.style.transform = 'scaleX(0)';
         } else {
             document.body.style.overflow = 'auto';
         }
         return () => { document.body.style.overflow = 'auto'; };
     }, [isOpen]);
+
+    // Close on Escape (desktop keyboard support).
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKey = (e) => { if (e.key === 'Escape') onCloseRef.current?.(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isOpen]);
+
+    // Reading progress — thin accent bar along the top of the sheet.
+    useEffect(() => {
+        const scroller = scrollRef.current;
+        if (!scroller) return;
+        const onScroll = () => {
+            const max = scroller.scrollHeight - scroller.clientHeight;
+            const p = max > 40 ? Math.min(1, scroller.scrollTop / max) : 0;
+            if (progressRef.current) progressRef.current.style.transform = `scaleX(${p})`;
+        };
+        onScroll();
+        scroller.addEventListener('scroll', onScroll, { passive: true });
+        return () => scroller.removeEventListener('scroll', onScroll);
+    }, [card, isOpen]);
 
     // Native swipe-up / swipe-down to close (non-passive so we can preventDefault).
     useEffect(() => {
@@ -145,6 +169,11 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
                 ref={panelRef}
                 className={`relative w-full max-w-[760px] h-[94vh] bg-bg text-ink rounded-t-[1.75rem] border-t border-line shadow-[0_-24px_60px_-20px_rgba(0,0,0,0.55)] flex flex-col overflow-hidden transition-transform duration-[550ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
             >
+                {/* Reading progress */}
+                <div className="absolute top-0 left-0 right-0 h-[3px] z-20 pointer-events-none">
+                    <div ref={progressRef} className="h-full bg-accent origin-left transition-transform duration-150 ease-out" style={{ transform: 'scaleX(0)' }} />
+                </div>
+
                 {/* Scrollable Article Content (also the swipe surface) */}
                 <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar" style={{ touchAction: 'pan-y' }}>
                     <div className="sheet-grab"><span /></div>

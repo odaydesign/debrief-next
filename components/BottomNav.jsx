@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Layers, Calendar, Search, Bookmark, Plus } from 'lucide-react';
+import { Layers, Calendar, Search, Bookmark, StickyNote } from 'lucide-react';
 
 const navItems = [
-  { icon: Layers, href: '/', label: 'Feed' },
-  { icon: Calendar, href: '/archive', label: 'Archive' },
-  { icon: Search, href: '/search', label: 'Search' },
-  { icon: Bookmark, href: '/bookmarks', label: 'Bookmarks' },
-  { icon: Plus, href: '/notes', label: 'Notes' },
+  { icon: Layers, href: '/', label: 'Flöde' },
+  { icon: Calendar, href: '/archive', label: 'Arkiv' },
+  { icon: Search, href: '/search', label: 'Sök' },
+  { icon: Bookmark, href: '/bookmarks', label: 'Sparat' },
+  { icon: StickyNote, href: '/notes', label: 'Anteckningar' },
 ];
 
 export default function BottomNav() {

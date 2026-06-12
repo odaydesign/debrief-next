@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
-import { useDailySummary } from "@/lib/dailySummary";
-import { Layers, ArrowLeft } from 'lucide-react';
+import { CardContent } from "@/components/FeedMasonryComponents";
+import { Masthead, EditorialList, DayMagazineLayout } from "@/components/DayMagazine";
+import { Layers } from 'lucide-react';
 
 // ─── Date helpers ────────────────────────────────────────────────────────────
 const getDateString = (dateObj) => {
@@ -22,130 +22,6 @@ const generateWeekStacks = (baseDate, articles) => {
     stacks.push({ id: `stack-${d.toISOString()}`, date: d, articles: dayArticles });
   }
   return stacks;
-};
-
-// ─── Editorial single-column list (index 0 = hero) ───────────────────────────
-const EditorialList = ({ articles, onArticleClick }) => (
-  <div className="w-full flex justify-center px-4">
-    <div className="w-full max-w-[640px] flex flex-col gap-4">
-      {articles.map((a, i) => (
-        <FadeInCard key={a._id || a.id || i} index={i} onClick={() => onArticleClick(a)}>
-          <div className="pointer-events-none h-full w-full">
-            <CardContent data={a} featured={i === 0} />
-          </div>
-        </FadeInCard>
-      ))}
-    </div>
-  </div>
-);
-
-// ─── Editorial masthead (per day) ────────────────────────────────────────────
-const editionNo = (date) => {
-  const d = new Date(date);
-  const start = new Date(d.getFullYear(), 0, 0);
-  return Math.floor((d - start) / 86400000); // day-of-year as a stable edition number
-};
-
-const totalMinutes = (articles) => {
-  const sum = articles.reduce((acc, a) => {
-    const m = parseInt(String(a.readTime || '').match(/\d+/)?.[0] || '0', 10);
-    return acc + (m || 0);
-  }, 0);
-  return sum || articles.length * 3;
-};
-
-// Turn a Title-Case headline into a flowing clause. Keeps acronyms / words
-// with digits (GPT-6, AI) intact; lowercases ordinary words. `lead` keeps the
-// first word's original capitalisation (used for the opening clause).
-const clauseCase = (title, lead) => {
-  return String(title)
-    .replace(/[.!?]+$/, '')
-    .split(/\s+/)
-    .map((w, i) => {
-      const keep = /[0-9]/.test(w) || (w.length <= 4 && w === w.toUpperCase());
-      if (keep) return w;
-      if (i === 0 && lead) return w;
-      return w.charAt(0).toLowerCase() + w.slice(1);
-    })
-    .join(' ');
-};
-
-// Build a short, sharp "today's news" summary by weaving the day's top
-// headlines into one sentence. Returns { ink, tail } for a two-tone render
-// (tail = the final clause, shown muted). Falls back gracefully.
-const summaryParts = (articles) => {
-  const titles = articles.map((a) => a.title).filter(Boolean);
-  if (titles.length === 0) return { ink: 'Dagens viktigaste nyheter', tail: null };
-
-  const picked = [];
-  let len = 0;
-  for (const t of titles) {
-    if (picked.length >= 3) break;
-    if (picked.length && len + t.length > 78) break;
-    picked.push(t);
-    len += t.length;
-  }
-
-  const clauses = picked.map((t, i) => clauseCase(t, i === 0));
-  if (clauses.length === 1) return { ink: clauses[0], tail: null };
-  return { ink: clauses.slice(0, -1).join(', '), tail: clauses[clauses.length - 1] };
-};
-
-const Masthead = ({ date, articles, onBack }) => {
-  const count = articles.length;
-  const min = totalMinutes(articles);
-  const dateLabel = date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const aiSummary = useDailySummary(date, articles);
-  const { ink, tail } = summaryParts(articles);
-
-  return (
-    <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9">
-      {onBack ? (
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase text-muted hover:text-ink transition-colors mb-5 group"
-        >
-          <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform" />
-          Tillbaka
-        </button>
-      ) : (
-        <span className="font-serif text-base font-semibold tracking-tight block mb-3">Debrief</span>
-      )}
-
-      <p className="kicker mb-3">Edition №{editionNo(date)} · {dateLabel}</p>
-
-      <h1 className="font-serif font-semibold text-[1.95rem] md:text-[2.6rem] leading-[1.08] tracking-tight">
-        {aiSummary
-          ? aiSummary
-          : <>{ink}{tail ? <> och <span className="text-muted">{tail}.</span></> : '.'}</>}
-      </h1>
-
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mt-5">
-        <span className="meta">{count} {count === 1 ? 'brief' : 'briefer'}</span>
-        <span className="meta">{min} min</span>
-        <span className="meta" style={{ color: 'var(--accent)' }}>Handplockat</span>
-      </div>
-    </div>
-  );
-};
-
-// ─── Day layout — header + list, used for opened stacks ──────────────────────
-const DayMagazineLayout = ({ articles, onArticleClick, date, onClose }) => {
-  return (
-    <div className="min-h-screen bg-bg text-ink">
-      <Masthead date={date} articles={articles} onBack={onClose} />
-
-      {articles.length === 0 ? (
-        <div className="px-5 py-20 text-center text-muted">
-          Inga artiklar publicerade denna dag.
-        </div>
-      ) : (
-        <main className="pt-6 pb-24">
-          <EditorialList articles={articles} onArticleClick={onArticleClick} />
-        </main>
-      )}
-    </div>
-  );
 };
 
 // ─── Single stack node (past days, clickable) ────────────────────────────────
@@ -224,6 +100,35 @@ const DailyStackNode = ({ stack, onOpen }) => {
   );
 };
 
+// ─── Loading skeleton — mirrors the masthead + editorial list ────────────────
+const FeedSkeleton = () => (
+  <div className="min-h-screen bg-bg">
+    <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9 animate-pulse">
+      <div className="h-4 w-16 bg-surface rounded mb-5" />
+      <div className="h-3 w-52 bg-surface rounded mb-6" />
+      <div className="space-y-3 mb-7">
+        <div className="h-9 w-full bg-surface rounded" />
+        <div className="h-9 w-4/5 bg-surface rounded" />
+      </div>
+      <div className="flex gap-5">
+        <div className="h-3 w-14 bg-surface rounded" />
+        <div className="h-3 w-12 bg-surface rounded" />
+      </div>
+    </div>
+    <div className="max-w-[640px] mx-auto px-4 flex flex-col gap-4 pt-6 pb-32">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="animate-pulse bg-card border border-line rounded-2xl p-5" style={{ animationDelay: `${i * 140}ms` }}>
+          <div className="h-3 w-20 bg-surface rounded mb-4" />
+          <div className="h-6 w-full bg-surface rounded mb-2" />
+          <div className="h-6 w-3/4 bg-surface rounded mb-4" />
+          <div className="h-3 w-full bg-surface rounded mb-1.5" />
+          <div className="h-3 w-5/6 bg-surface rounded" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 // ─── Main FeedView ────────────────────────────────────────────────────────────
 const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, loading }) => {
   const [openStack, setOpenStack] = useState(null);
@@ -251,13 +156,19 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
 
   const handleScroll = (e) => { if (!openStack) scrollRef.current = e.target.scrollTop; };
 
-  if (loading || weekStacks.length === 0) {
+  if (loading) {
+    return <FeedSkeleton />;
+  }
+
+  // No articles at all — show a real empty state instead of an eternal spinner.
+  if (weekStacks.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-bg">
-        <div className="animate-pulse space-y-4 flex flex-col items-center">
-          <div className="w-16 h-16 bg-surface rounded-full" />
-          <p className="text-muted font-sans tracking-widest text-xs uppercase">Laddar sammanfattning</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-bg px-6 text-center">
+        <span className="font-serif text-base font-semibold tracking-tight mb-8">Debrief</span>
+        <h1 className="font-serif text-3xl text-ink mb-3">Inget publicerat än</h1>
+        <p className="text-muted font-sans max-w-sm leading-relaxed">
+          Dagens briefer dyker upp här så fort de är handplockade.
+        </p>
       </div>
     );
   }

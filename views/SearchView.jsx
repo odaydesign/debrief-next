@@ -36,11 +36,14 @@ const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
 
     // Filter articles based on search text AND selected tags
     const filteredArticles = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         return articles.filter(article => {
-            // Text search match
-            const matchesSearch = searchQuery === '' ||
-                article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (article.summary && article.summary.toLowerCase().includes(searchQuery.toLowerCase()));
+            // Text search match — title, dek, tag and source all count
+            const matchesSearch = q === '' ||
+                (article.title || '').toLowerCase().includes(q) ||
+                (article.summary || article.description || '').toLowerCase().includes(q) ||
+                (article.tag || article.category || '').toLowerCase().includes(q) ||
+                (article.source || article.author || '').toLowerCase().includes(q);
 
             // Tag combination match (must have ALL selected tags, but since our schema currently only supports 1 tag per article, 
             // we will treat it as "matches ANY selected tag" for now. If you update your schema to v.array() later, change this to every())
@@ -106,8 +109,17 @@ const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
                             placeholder="Sök artiklar..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-card border border-line rounded-2xl pl-12 pr-4 py-4 text-ink placeholder:text-muted focus:outline-none focus:border-accent focus:bg-surface transition-colors font-sans"
+                            className="w-full bg-card border border-line rounded-2xl pl-12 pr-12 py-4 text-ink placeholder:text-muted focus:outline-none focus:border-accent focus:bg-surface transition-colors font-sans"
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                aria-label="Rensa sökning"
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted hover:text-ink transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        )}
                     </div>
 
                     {/* Tags Section */}
