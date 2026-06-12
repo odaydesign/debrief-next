@@ -25,8 +25,32 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Debrief",
-  description: "Your daily news briefing",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "Debrief — Din dagliga nyhetsbrief",
+    template: "%s – Debrief",
+  },
+  description:
+    "Dagens viktigaste nyheter, handplockade och sammanfattade. Ett nummer om dagen — läs klart och var ikapp.",
+  applicationName: "Debrief",
+  appleWebApp: {
+    capable: true,
+    title: "Debrief",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: { telephone: false },
+  openGraph: {
+    siteName: "Debrief",
+    locale: "sv_SE",
+    type: "website",
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#26231f",
 };
 
 // Set the theme before first paint to avoid a flash of the wrong theme.

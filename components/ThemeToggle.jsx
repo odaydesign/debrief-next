@@ -8,11 +8,22 @@ import { Sun, Moon } from "lucide-react";
  * dark "ink" and light "paper" palettes and persists the choice. The initial
  * theme is set pre-paint by the bootstrap script in app/layout.js.
  */
+const THEME_COLORS = { ink: "#26231f", paper: "#f4f1ea" };
+
+// Keep the browser/OS chrome (PWA title bar, Android status bar) in sync
+// with the active palette.
+const syncThemeColor = (theme) => {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", THEME_COLORS[theme] || THEME_COLORS.ink);
+};
+
 export default function ThemeToggle() {
   const [theme, setTheme] = useState("ink");
 
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme || "ink");
+    const current = document.documentElement.dataset.theme || "ink";
+    setTheme(current);
+    syncThemeColor(current);
   }, []);
 
   const toggle = () => {
@@ -23,6 +34,7 @@ export default function ThemeToggle() {
     } catch {
       /* ignore */
     }
+    syncThemeColor(next);
     setTheme(next);
   };
 

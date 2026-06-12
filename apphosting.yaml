@@ -40,6 +40,14 @@ env:
       - BUILD
       - RUNTIME
 
+  # Canonical site origin — used for metadataBase, Open Graph URLs, sitemap
+  # and robots. Update if a custom domain is attached.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://debrief-3ef06.web.app
+    availability:
+      - BUILD
+      - RUNTIME
+
   # Optional: override the daily-summary model (default openai/gpt-4o-mini).
   - variable: OPENROUTER_MODEL
     value: openai/gpt-4o-mini
