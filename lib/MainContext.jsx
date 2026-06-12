@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useMutation, useQuery, api } from "@/lib/db";
 import { useAuthContext } from "@/lib/AuthContext";
 
@@ -56,24 +57,64 @@ export function MainProvider({ children }) {
   const markReadMutation = useMutation(api.articles.markRead);
   const toggleBookmarkMutation = useMutation(api.articles.toggleBookmark);
 
+  // Whether we pushed a /a/[id] history entry for the open overlay. Closing
+  // then goes through history.back() so URL and sheet state stay in sync.
+  const pushedRef = useRef(false);
+
+  const markArticleRead = useCallback((articleId) => {
+    if (!user || !articleId) return;
+    markReadMutation({ userId: user.id, articleId });
+  }, [user, markReadMutation]);
+
+  const closeOverlayState = useCallback(() => {
+    setIsOverlayOpen(false);
+    setTimeout(() => setActiveArticle(null), 800);
+  }, []);
+
   const handleOpenArticle = useCallback((article) => {
     if (!article) {
-      setIsOverlayOpen(false);
-      setTimeout(() => setActiveArticle(null), 800);
+      closeOverlayState();
       return;
     }
     setActiveArticle(article);
     setTimeout(() => setIsOverlayOpen(true), 20);
 
-    if (user) {
-      markReadMutation({ userId: user.id, articleId: article.id });
+    // Give the article a shareable URL while reading. pushState is synced
+    // with the App Router without remounting, so the sheet animation is kept.
+    const id = article.id || article._id;
+    if (id && typeof window !== 'undefined') {
+      try {
+        window.history.pushState({ debriefOverlay: id }, '', `/a/${id}`);
+        pushedRef.current = true;
+      } catch { /* ignore */ }
     }
-  }, [user, markReadMutation]);
+
+    markArticleRead(id);
+  }, [markArticleRead, closeOverlayState]);
 
   const handleCloseOverlay = useCallback(() => {
-    setIsOverlayOpen(false);
-    setTimeout(() => setActiveArticle(null), 800);
-  }, []);
+    if (pushedRef.current && window.location.pathname.startsWith('/a/')) {
+      pushedRef.current = false;
+      // The pathname effect below performs the actual close after back().
+      window.history.back();
+      return;
+    }
+    pushedRef.current = false;
+    closeOverlayState();
+  }, [closeOverlayState]);
+
+  // The App Router syncs usePathname with both pushState and popstate, so this
+  // covers hardware/browser back (mobile-native sheet dismissal) AND nav-link
+  // navigation while the sheet is open.
+  const pathname = usePathname();
+  const overlayOpenRef = useRef(false);
+  useEffect(() => { overlayOpenRef.current = isOverlayOpen; }, [isOverlayOpen]);
+  useEffect(() => {
+    if (overlayOpenRef.current && !pathname.startsWith('/a/')) {
+      pushedRef.current = false;
+      closeOverlayState();
+    }
+  }, [pathname, closeOverlayState]);
 
   const toggleBookmark = useCallback((id, collectionId = 'all') => {
     if (!user) return;
@@ -102,6 +143,7 @@ export function MainProvider({ children }) {
     openArticle: handleOpenArticle,
     closeOverlay: handleCloseOverlay,
     toggleBookmark,
+    markArticleRead,
   };
 
   return (
