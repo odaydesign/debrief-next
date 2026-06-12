@@ -224,6 +224,35 @@ const DailyStackNode = ({ stack, onOpen }) => {
   );
 };
 
+// ─── Loading skeleton — mirrors the masthead + editorial list ────────────────
+const FeedSkeleton = () => (
+  <div className="min-h-screen bg-bg">
+    <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9 animate-pulse">
+      <div className="h-4 w-16 bg-surface rounded mb-5" />
+      <div className="h-3 w-52 bg-surface rounded mb-6" />
+      <div className="space-y-3 mb-7">
+        <div className="h-9 w-full bg-surface rounded" />
+        <div className="h-9 w-4/5 bg-surface rounded" />
+      </div>
+      <div className="flex gap-5">
+        <div className="h-3 w-14 bg-surface rounded" />
+        <div className="h-3 w-12 bg-surface rounded" />
+      </div>
+    </div>
+    <div className="max-w-[640px] mx-auto px-4 flex flex-col gap-4 pt-6 pb-32">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="animate-pulse bg-card border border-line rounded-2xl p-5" style={{ animationDelay: `${i * 140}ms` }}>
+          <div className="h-3 w-20 bg-surface rounded mb-4" />
+          <div className="h-6 w-full bg-surface rounded mb-2" />
+          <div className="h-6 w-3/4 bg-surface rounded mb-4" />
+          <div className="h-3 w-full bg-surface rounded mb-1.5" />
+          <div className="h-3 w-5/6 bg-surface rounded" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 // ─── Main FeedView ────────────────────────────────────────────────────────────
 const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, loading }) => {
   const [openStack, setOpenStack] = useState(null);
@@ -251,13 +280,19 @@ const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, 
 
   const handleScroll = (e) => { if (!openStack) scrollRef.current = e.target.scrollTop; };
 
-  if (loading || weekStacks.length === 0) {
+  if (loading) {
+    return <FeedSkeleton />;
+  }
+
+  // No articles at all — show a real empty state instead of an eternal spinner.
+  if (weekStacks.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-bg">
-        <div className="animate-pulse space-y-4 flex flex-col items-center">
-          <div className="w-16 h-16 bg-surface rounded-full" />
-          <p className="text-muted font-sans tracking-widest text-xs uppercase">Laddar sammanfattning</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-bg px-6 text-center">
+        <span className="font-serif text-base font-semibold tracking-tight mb-8">Debrief</span>
+        <h1 className="font-serif text-3xl text-ink mb-3">Inget publicerat än</h1>
+        <p className="text-muted font-sans max-w-sm leading-relaxed">
+          Dagens briefer dyker upp här så fort de är handplockade.
+        </p>
       </div>
     );
   }

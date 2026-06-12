@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Bookmark, BookOpen, Download, ArrowUpRight, Headphones } from 'lucide-react';
+import { Play, Bookmark, BookOpen, Download, ArrowUpRight, Headphones, Check } from 'lucide-react';
 import { useMainOptional } from '@/lib/MainContext';
 import { Tweet } from 'react-tweet';
 
@@ -113,6 +113,11 @@ export const CardContent = ({ data, featured = false }) => {
     const footer = (cls = '') => (
         <div className={`flex items-center gap-2.5 pt-3 border-t border-line ${cls}`}>
             <span className="meta flex-1 min-w-0 truncate">{source}{dateStr ? ` · ${dateStr}` : ''}</span>
+            {data.isRead && (
+                <span className="meta inline-flex items-center gap-1 shrink-0" style={{ color: 'var(--faint)' }}>
+                    <Check size={11} strokeWidth={3} /> Läst
+                </span>
+            )}
             {saveBtn}
         </div>
     );
