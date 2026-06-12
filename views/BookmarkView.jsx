@@ -127,9 +127,9 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
 
     return (
         <div className="min-h-screen bg-bg pt-4 animate-in fade-in duration-500 overflow-y-auto">
-            <header className="sticky top-0 left-0 right-0 z-30 bg-gradient-to-b from-bg/95 via-bg/90 to-transparent backdrop-blur-[2px] pt-6 pb-2 px-6 md:px-8 mb-6 pointer-events-none">
+            <header className="sticky top-0 left-0 right-0 z-30 bg-bg/92 backdrop-blur-xl border-b border-line pt-6 pb-2 px-6 md:px-8 mb-6 pointer-events-none">
                 <div className="max-w-[1600px] mx-auto pointer-events-auto">
-                    <h1 className="text-3xl md:text-4xl font-serif text-ink drop-shadow-md tracking-tight mb-2">Sparat & Bundles</h1>
+                    <h1 className="text-3xl md:text-4xl font-serif text-ink tracking-tight mb-2">Sparat & Bundles</h1>
                     <p className="text-sm text-muted font-sans mb-8">Dina bokmärken och smarta tag-kombinationer.</p>
 
                     {/* Bundle Navigation Tabs */}
@@ -278,7 +278,7 @@ const BookmarkView = ({ articles, allArticles, activeArticle, setActiveArticle, 
                                         required
                                         value={editBundleName}
                                         onChange={(e) => setEditBundleName(e.target.value)}
-                                        className="w-full bg-black/30 border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-ink placeholder:text-faint"
+                                        className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-ink placeholder:text-faint"
                                     />
                                 </div>
 

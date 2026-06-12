@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, FolderPlus, X, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SwipeableCard from "@/components/SwipeableCard";
 import { FadeInCard, CardContent } from "@/components/FeedMasonryComponents";
 import CustomModal from "@/components/CustomModal";
 import { useMutation, api } from "@/lib/db";
@@ -95,9 +94,9 @@ const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
     return (
         <div className="min-h-screen bg-bg pt-4 animate-in fade-in duration-500 overflow-y-auto">
             {/* Sticky Header */}
-            <header className="sticky top-0 left-0 right-0 z-30 bg-gradient-to-b from-bg/95 via-bg/90 to-transparent backdrop-blur-[2px] pt-6 pb-2 px-6 md:px-8 mb-6 pointer-events-none">
+            <header className="sticky top-0 left-0 right-0 z-30 bg-bg/92 backdrop-blur-xl border-b border-line pt-6 pb-4 px-6 md:px-8 mb-6 pointer-events-none">
                 <div className="max-w-[1600px] mx-auto pointer-events-auto">
-                    <h1 className="text-3xl md:text-4xl font-serif text-ink drop-shadow-md tracking-tight mb-6">Upptäck</h1>
+                    <h1 className="text-3xl md:text-4xl font-serif text-ink tracking-tight mb-6">Upptäck</h1>
 
                     {/* Search Bar */}
                     <div className="relative mb-6">
@@ -106,7 +105,7 @@ const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
                         </div>
                         <input
                             type="text"
-                            placeholder="Sök artiklar..."
+                            placeholder="Sök artiklar, taggar eller källor…"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-card border border-line rounded-2xl pl-12 pr-12 py-4 text-ink placeholder:text-muted focus:outline-none focus:border-accent focus:bg-surface transition-colors font-sans"
@@ -236,7 +235,7 @@ const SearchView = ({ articles, activeArticle, setActiveArticle, user }) => {
                                         value={bundleName}
                                         onChange={(e) => setBundleName(e.target.value)}
                                         placeholder="T.ex. AI & Design"
-                                        className="w-full bg-black/30 border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-ink placeholder:text-faint"
+                                        className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent text-ink placeholder:text-faint"
                                     />
                                 </div>
                                 <button

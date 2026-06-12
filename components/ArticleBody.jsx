@@ -27,7 +27,7 @@ const ArticleBody = ({ card }) => {
             {/* title — most types show a headline; quote & stat render their own hero */}
             {type !== 'quote' && type !== 'stat' && (
                 <>
-                    <h1 className="font-serif text-[2rem] md:text-[2.6rem] leading-[1.08] tracking-tight mb-3">{card.title}</h1>
+                    <h1 className="font-serif text-[2rem] md:text-[2.6rem] leading-[1.08] tracking-tight text-balance mb-3">{card.title}</h1>
                     {dateStr && <p className="meta mb-7">{dateStr}</p>}
                 </>
             )}
@@ -106,14 +106,14 @@ const ArticleBody = ({ card }) => {
             ) : type === 'quote' ? (
                 <div className="mb-9 mt-1">
                     <span className="font-serif text-accent text-[80px] leading-[0] block h-9 select-none">“</span>
-                    <blockquote className="font-serif italic font-medium text-[1.9rem] md:text-[2.4rem] leading-[1.28] tracking-[-0.01em] mt-3">{card.title}</blockquote>
+                    <blockquote className="font-serif italic font-medium text-[1.9rem] md:text-[2.4rem] leading-[1.28] tracking-[-0.01em] text-balance mt-3">{card.title}</blockquote>
                     <div className="meta mt-6">— {source}{dateStr ? ` · ${dateStr}` : ''}</div>
                 </div>
             ) : type === 'stat' ? (
                 <div className="mb-9 mt-1 text-center">
                     <div className="font-serif font-semibold text-[5rem] md:text-[6.5rem] leading-[0.85] tracking-[-0.04em] text-accent">{card.big || card.stat || card.value}</div>
                     {card.unit && <div className="meta mt-3">{card.unit}</div>}
-                    <h1 className="font-serif text-[1.5rem] md:text-[1.9rem] leading-tight tracking-tight mt-5">{card.title}</h1>
+                    <h1 className="font-serif text-[1.5rem] md:text-[1.9rem] leading-tight tracking-tight text-balance mt-5">{card.title}</h1>
                     <p className="meta mt-4">{source}{dateStr ? ` · ${dateStr}` : ''}</p>
                 </div>
             ) : card.image ? (
