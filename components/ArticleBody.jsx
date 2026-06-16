@@ -6,45 +6,77 @@ import { Tweet } from 'react-tweet';
 import { useMainOptional } from '@/lib/MainContext';
 
 /**
- * The article itself — title, type-specific hero, lead, body and source link.
+ * The article itself — hero, title, lead, body and source link.
  * Shared by the reader overlay (bottom sheet) and the standalone /a/[id] page.
+ *
+ * Type hierarchy is deliberately quiet: one accent kicker (the tag), one
+ * serif headline, one muted byline. Everything else is body text. Images are
+ * treated as full-bleed heroes rather than framed inline boxes.
  */
 const ArticleBody = ({ card }) => {
     const main = useMainOptional();
 
-    const dateStr = card.date instanceof Date ? card.date.toLocaleDateString('sv-SE') : card.date;
+    const niceDate = card.date instanceof Date
+        ? card.date.toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })
+        : card.date;
     const id = card.id || card._id;
     const saved = !!card.isBookmarked;
     const lead = card.description || card.summary;
     const body = card.fullText || card.content || "";
     const type = (card.type || 'news').toLowerCase();
     const source = card.source || card.author || 'Debrief';
+    const tag = card.tag || card.category;
+    const readTime = card.readTime ? String(card.readTime).trim() : null;
     const articleLike = ['news', 'article', 'analysis', 'textonly', 'map', 'weather', 'profile'].includes(type);
+    // Types that carry their own source/meta in their hero don't need a byline.
+    const showByline = !['quote', 'stat', 'book', 'podcast'].includes(type);
+    const byline = [source, niceDate, readTime].filter(Boolean).join('  ·  ');
     const stop = (e) => e.stopPropagation();
 
     return (
         <>
-            {/* title — most types show a headline; quote & stat render their own hero */}
+            {/* Hero image — full-bleed, image-forward; no frame, no caption clutter */}
+            {articleLike && card.image && (
+                <div className="-mx-5 md:-mx-8 mb-7">
+                    <div className="w-full aspect-[4/3] sm:aspect-[3/2] overflow-hidden rounded-2xl bg-surface">
+                        <img
+                            src={card.image}
+                            alt={card.title}
+                            className="w-full h-full object-cover"
+                            style={{ objectPosition: `${card.imageFocalX ?? 50}% ${card.imageFocalY ?? 50}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Header — one kicker, a generous headline, one quiet byline */}
             {type !== 'quote' && type !== 'stat' && (
-                <>
-                    <h1 className="font-serif text-[2rem] md:text-[2.6rem] leading-[1.08] tracking-tight text-balance mb-3">{card.title}</h1>
-                    {dateStr && <p className="meta mb-7">{dateStr}</p>}
-                </>
+                <header className="mb-8">
+                    {tag && <p className="kicker mb-3">{tag}</p>}
+                    <h1 className="font-serif text-[2.05rem] md:text-[2.7rem] leading-[1.06] tracking-[-0.015em] text-balance">{card.title}</h1>
+                    {showByline && byline && (
+                        <p className="mt-4 text-[13.5px] md:text-sm text-muted">{byline}</p>
+                    )}
+                </header>
             )}
 
             {/* ── type-specific hero ── */}
             {type === 'twitter' && card.externalId ? (
                 <div data-theme="dark" className="w-full flex justify-center mb-8"><Tweet id={card.externalId} /></div>
             ) : type === 'youtube' && card.externalId ? (
-                <div className="w-full aspect-video rounded-2xl overflow-hidden mb-9 shadow-lg bg-black">
-                    <iframe src={`https://www.youtube.com/embed/${card.externalId}`} title={card.title} className="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                <div className="-mx-5 md:-mx-8 mb-9">
+                    <div className="w-full aspect-video overflow-hidden rounded-2xl bg-black">
+                        <iframe src={`https://www.youtube.com/embed/${card.externalId}`} title={card.title} className="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    </div>
                 </div>
             ) : (type === 'youtube' || type === 'video' || type === 'media') ? (
-                <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-line mb-9 bg-black/30">
-                    {card.image && <img src={card.image} alt={card.title} className="w-full h-full object-cover opacity-80" />}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5">
-                        <span className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg" style={{ background: '#e2563f' }}><Play size={24} fill="currentColor" /></span>
-                        {card.dur && <span className="meta" style={{ color: '#fff' }}>{card.dur}</span>}
+                <div className="-mx-5 md:-mx-8 mb-9">
+                    <div className="relative w-full aspect-video overflow-hidden rounded-2xl bg-surface">
+                        {card.image && <img src={card.image} alt={card.title} className="w-full h-full object-cover" />}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-black/15">
+                            <span className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg" style={{ background: '#e2563f' }}><Play size={24} fill="currentColor" /></span>
+                            {card.dur && <span className="meta" style={{ color: '#fff' }}>{card.dur}</span>}
+                        </div>
                     </div>
                 </div>
             ) : type === 'book' ? (
@@ -107,25 +139,24 @@ const ArticleBody = ({ card }) => {
                 <div className="mb-9 mt-1">
                     <span className="font-serif text-accent text-[80px] leading-[0] block h-9 select-none">“</span>
                     <blockquote className="font-serif italic font-medium text-[1.9rem] md:text-[2.4rem] leading-[1.28] tracking-[-0.01em] text-balance mt-3">{card.title}</blockquote>
-                    <div className="meta mt-6">— {source}{dateStr ? ` · ${dateStr}` : ''}</div>
+                    <div className="meta mt-6">— {source}{niceDate ? ` · ${niceDate}` : ''}</div>
                 </div>
             ) : type === 'stat' ? (
                 <div className="mb-9 mt-1 text-center">
                     <div className="font-serif font-semibold text-[5rem] md:text-[6.5rem] leading-[0.85] tracking-[-0.04em] text-accent">{card.big || card.stat || card.value}</div>
                     {card.unit && <div className="meta mt-3">{card.unit}</div>}
                     <h1 className="font-serif text-[1.5rem] md:text-[1.9rem] leading-tight tracking-tight text-balance mt-5">{card.title}</h1>
-                    <p className="meta mt-4">{source}{dateStr ? ` · ${dateStr}` : ''}</p>
+                    <p className="meta mt-4">{source}{niceDate ? ` · ${niceDate}` : ''}</p>
                 </div>
-            ) : card.image ? (
-                <figure className="mb-9">
-                    <div className="w-full aspect-video rounded-2xl overflow-hidden border border-line"><img src={card.image} alt={card.title} className="w-full h-full object-cover" /></div>
-                    <figcaption className="meta mt-2">Foto · {source}</figcaption>
-                </figure>
+            ) : (!articleLike && card.image) ? (
+                <div className="-mx-5 md:-mx-8 mb-9">
+                    <div className="w-full aspect-[3/2] overflow-hidden rounded-2xl bg-surface"><img src={card.image} alt={card.title} className="w-full h-full object-cover" /></div>
+                </div>
             ) : null}
 
-            {/* lead — drop-cap for articles, plain for typed cards */}
+            {/* lead — a calm, larger standfirst (no drop-cap flourish) */}
             {articleLike && lead && (
-                <p className="reader-body drop-cap font-serif text-[1.3rem] md:text-[1.45rem] leading-[1.55] mb-7">{lead}</p>
+                <p className="font-serif text-[1.28rem] md:text-[1.4rem] leading-[1.58] text-dek mb-8">{lead}</p>
             )}
             {!articleLike && type !== 'quote' && type !== 'stat' && lead && (
                 <p className="reader-body text-[1.08rem] leading-relaxed mb-7">{lead}</p>
@@ -137,20 +168,22 @@ const ArticleBody = ({ card }) => {
             ) : articleLike ? (
                 <div className="reader-body">
                     <p>I en era som definieras av snabba tekniska förändringar är förmågan att anpassa sig och förutse grundläggande skiften avgörande. Denna utveckling markerar en betydande milstolpe i det bredare landskapet och sätter nya riktmärken för innovation och operationell skala.</p>
-                    <p>Analytiker tror att detta drag kommer att utlösa en kaskad av liknande strategier över hela branschen. "Vi bevittnar mognaden av koncept som var rent teoretiska för bara fem år sedan," noterade en ledande forskare.</p>
+                    <p>Analytiker tror att detta drag kommer att utlösa en kaskad av liknande strategier över hela branschen. ”Vi bevittnar mognaden av koncept som var rent teoretiska för bara fem år sedan”, noterade en ledande forskare.</p>
                     <p>Framöver planerar teamet att utöka sitt operationella fotavtryck avsevärt under de kommande 18 månaderna. Med resurserna nu säkrade skiftar fokus helt från att bevisa konceptet till att skala utförandet globalt.</p>
                 </div>
             ) : null}
 
+            {/* source link — a quiet inline link, not a shouty uppercase bar */}
             {card.sourceLink && (
-                <div className="mt-10 pt-7 border-t border-line">
+                <div className="mt-10 pt-6 border-t border-line">
                     <a
                         href={card.sourceLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-accent hover:opacity-70 transition-opacity"
+                        className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-accent hover:opacity-80 transition-opacity"
                     >
-                        {card.sourceText || 'Till källan'} ↗
+                        {card.sourceText || `Läs hela artikeln hos ${source}`}
+                        <ArrowUpRight size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </a>
                 </div>
             )}

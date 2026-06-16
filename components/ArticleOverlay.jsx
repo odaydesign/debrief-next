@@ -122,7 +122,6 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
 
     if (!card) return null;
 
-    const tag = card.tag || card.category;
     const id = card.id || card._id;
     const saved = !!card.isBookmarked;
 
@@ -151,19 +150,16 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
                     <div className="sheet-grab"><span /></div>
 
                     <div className="max-w-[680px] mx-auto px-5 md:px-8 pb-32 pt-1">
-                        {/* topline: chip + share + close */}
-                        <div className="flex items-center justify-between mb-5">
-                            {tag ? <span className="chip"><span className="chip-dot" />{tag}</span> : <span />}
-                            <div className="flex items-center gap-2">
-                                <ShareButton article={card} variant="icon" />
-                                <button
-                                    onClick={onClose}
-                                    aria-label="Stäng"
-                                    className="w-9 h-9 rounded-full border border-line bg-card text-ink flex items-center justify-center hover:bg-surface transition-colors active:scale-90"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
+                        {/* topline: just the controls — the tag now lives as the article kicker */}
+                        <div className="flex items-center justify-end gap-2 mb-4">
+                            <ShareButton article={card} variant="icon" />
+                            <button
+                                onClick={onClose}
+                                aria-label="Stäng"
+                                className="w-9 h-9 rounded-full border border-line bg-card text-ink flex items-center justify-center hover:bg-surface transition-colors active:scale-90"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                         </div>
 
                         <ArticleBody card={card} />
@@ -171,8 +167,7 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
                         <ArticleNotes articleId={id} />
 
                         {/* reading-end footer */}
-                        <div className="mt-12 pt-7 border-t border-line">
-                            <p className="meta text-center text-faint tracking-[0.25em] mb-5">— SLUT —</p>
+                        <div className="mt-14 pt-7 border-t border-line">
                             <div className="flex items-center gap-3">
                                 {id && main?.toggleBookmark && (
                                     <button
@@ -191,7 +186,7 @@ const ArticleOverlay = ({ card, isOpen, onClose }) => {
                                     Stäng ↓
                                 </button>
                             </div>
-                            <p className="meta text-center text-faint mt-5">Svep upp eller ner för att stänga</p>
+                            <p className="text-xs text-faint text-center mt-6">Svep för att stänga</p>
                         </div>
                     </div>
                 </div>

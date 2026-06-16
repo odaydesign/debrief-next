@@ -28,11 +28,15 @@ const ArticleStandalone = ({ id }) => {
 
     if (raw === undefined) {
         return (
-            <div className="max-w-[680px] mx-auto px-5 md:px-8 pt-14 pb-32 animate-pulse">
-                <div className="h-3 w-20 bg-surface rounded mb-8" />
+            <div className="max-w-[680px] mx-auto px-5 md:px-8 pt-10 pb-32 animate-pulse">
+                <div className="flex justify-between mb-7">
+                    <div className="h-4 w-20 bg-surface rounded" />
+                    <div className="h-8 w-8 bg-surface rounded-full" />
+                </div>
+                <div className="w-full aspect-[3/2] bg-surface rounded-2xl mb-7" />
+                <div className="h-3 w-16 bg-surface rounded mb-4" />
                 <div className="h-9 w-full bg-surface rounded mb-2" />
-                <div className="h-9 w-3/4 bg-surface rounded mb-8" />
-                <div className="w-full aspect-video bg-surface rounded-2xl mb-8" />
+                <div className="h-9 w-3/4 bg-surface rounded mb-5" />
                 <div className="h-3 w-full bg-surface rounded mb-2" />
                 <div className="h-3 w-[92%] bg-surface rounded mb-2" />
                 <div className="h-3 w-4/5 bg-surface rounded" />
@@ -55,24 +59,19 @@ const ArticleStandalone = ({ id }) => {
         );
     }
 
-    const tag = card.tag || card.category;
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-[680px] mx-auto px-5 md:px-8 pt-14 pb-32"
+            className="max-w-[680px] mx-auto px-5 md:px-8 pt-10 pb-32"
         >
-            {/* topline: wordmark home + chip + share */}
-            <div className="flex items-center justify-between mb-9">
+            {/* topline: wordmark home + share — the tag now lives as the article kicker */}
+            <div className="flex items-center justify-between mb-7">
                 <Link href="/" className="font-serif text-base font-semibold tracking-tight hover:text-accent transition-colors">
                     Debrief
                 </Link>
-                <div className="flex items-center gap-3">
-                    {tag && <span className="chip"><span className="chip-dot" />{tag}</span>}
-                    <ShareButton article={card} variant="icon" />
-                </div>
+                <ShareButton article={card} variant="icon" />
             </div>
 
             <ArticleBody card={card} />
@@ -80,8 +79,7 @@ const ArticleStandalone = ({ id }) => {
             <ArticleNotes articleId={id} />
 
             {/* footer CTA */}
-            <div className="mt-12 pt-7 border-t border-line text-center">
-                <p className="meta text-faint tracking-[0.25em] mb-5">— SLUT —</p>
+            <div className="mt-14 pt-8 border-t border-line text-center">
                 <Link href="/" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-ink text-sm font-semibold hover:opacity-90 transition-opacity">
                     Läs dagens utgåva →
                 </Link>
