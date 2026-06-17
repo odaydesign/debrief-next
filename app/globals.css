@@ -24,8 +24,25 @@
     --color-accent-soft: var(--accent-soft);
 }
 
-/* ─── Ink (dark, default) ─────────────────────────────────────────── */
+/* ─── Paper (light) — the default, professional news palette ──────── */
 :root,
+:root[data-theme="paper"] {
+    --bg: #fbfbfa;
+    --surface: #f1f1ef;
+    --card: #ffffff;
+    --ink: #15171c;
+    --dek: rgba(21, 23, 28, 0.70);
+    --muted: rgba(21, 23, 28, 0.54);
+    --faint: rgba(21, 23, 28, 0.40);
+    --line: rgba(21, 23, 28, 0.11);
+    --line-strong: rgba(21, 23, 28, 0.20);
+    --accent: #12863f;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(18, 134, 63, 0.10);
+    color-scheme: light;
+}
+
+/* ─── Ink (dark) ──────────────────────────────────────────────────── */
 :root[data-theme="ink"] {
     --bg: #26231f;
     --surface: #2f2b27;
@@ -40,23 +57,6 @@
     --accent-ink: #11241a;
     --accent-soft: rgba(80, 200, 120, 0.14);
     color-scheme: dark;
-}
-
-/* ─── Paper (light) ───────────────────────────────────────────────── */
-:root[data-theme="paper"] {
-    --bg: #f4f1ea;
-    --surface: #efeae0;
-    --card: #fffdf8;
-    --ink: #1f1c18;
-    --dek: rgba(31, 28, 24, 0.66);
-    --muted: rgba(31, 28, 24, 0.5);
-    --faint: rgba(31, 28, 24, 0.34);
-    --line: rgba(31, 28, 24, 0.13);
-    --line-strong: rgba(31, 28, 24, 0.26);
-    --accent: #1f8f55;
-    --accent-ink: #ffffff;
-    --accent-soft: rgba(31, 143, 85, 0.12);
-    color-scheme: light;
 }
 
 body {

@@ -1,35 +1,22 @@
 "use client";
 
-import { useState, useEffect } from 'react';
 import { useQuery, api } from "@/lib/db";
 import { useMain, formatArticles } from "@/lib/MainContext";
 import FeedView from "@/views/FeedView";
 
 export default function FeedPage() {
-  const { interactions, openArticle, toggleBookmark } = useMain();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const { interactions, openArticle } = useMain();
 
-  const dailyArticles = useQuery(api.articles.getDaily, { date: currentDate.toISOString() });
-
-  const articles = formatArticles(dailyArticles, interactions);
-  const loading = dailyArticles === undefined;
-
-  const goToPreviousDay = () => {
-    setCurrentDate(prev => {
-      const prevDate = new Date(prev);
-      prevDate.setDate(prev.getDate() - 1);
-      return prevDate;
-    });
-  };
+  // getDaily returns every article, newest first — the source for the river.
+  const raw = useQuery(api.articles.getDaily, {});
+  const articles = formatArticles(raw, interactions);
+  const loading = raw === undefined;
 
   return (
     <FeedView
       articles={articles}
       loading={loading}
-      currentDate={currentDate}
       setActiveArticle={openArticle}
-      toggleBookmark={toggleBookmark}
-      onLoadPreviousDay={goToPreviousDay}
     />
   );
 }

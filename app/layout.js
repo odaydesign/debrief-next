@@ -50,17 +50,17 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#26231f",
+  themeColor: "#fbfbfa",
 };
 
 // Set the theme before first paint to avoid a flash of the wrong theme.
-const themeBootstrap = `try{document.documentElement.dataset.theme=localStorage.getItem('debrief-theme')||'ink'}catch(e){document.documentElement.dataset.theme='ink'}`;
+const themeBootstrap = `try{document.documentElement.dataset.theme=localStorage.getItem('debrief-theme')||'paper'}catch(e){document.documentElement.dataset.theme='paper'}`;
 
 export default function RootLayout({ children }) {
   return (
     <html
       lang="sv"
-      data-theme="ink"
+      data-theme="paper"
       suppressHydrationWarning
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >

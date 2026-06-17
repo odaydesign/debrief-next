@@ -9,7 +9,7 @@ import { User, LogOut } from "lucide-react";
  * model: guests can upgrade via Google (keeping their uid + data); signed-in
  * users see their identity and can sign out (which drops back to a fresh guest).
  */
-export default function AccountButton() {
+export default function AccountButton({ inline = false }) {
   const {
     authLoading,
     isAnonymous,
@@ -60,11 +60,19 @@ export default function AccountButton() {
   const initial = (displayName || email || "G").trim().charAt(0).toUpperCase();
 
   return (
-    <div ref={ref} className="fixed right-5 z-[70]" style={{ top: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}>
+    <div
+      ref={ref}
+      className={inline ? "relative" : "fixed right-5 z-[70]"}
+      style={inline ? undefined : { top: "max(20px, calc(env(safe-area-inset-top) + 8px))" }}
+    >
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Konto"
-        className="w-10 h-10 rounded-full bg-card border border-line shadow-lg flex items-center justify-center overflow-hidden text-ink hover:bg-surface transition-colors active:scale-90"
+        className={
+          inline
+            ? "w-9 h-9 rounded-full bg-surface flex items-center justify-center overflow-hidden text-ink hover:opacity-80 transition-opacity active:scale-90"
+            : "w-10 h-10 rounded-full bg-card border border-line shadow-lg flex items-center justify-center overflow-hidden text-ink hover:bg-surface transition-colors active:scale-90"
+        }
       >
         {photoURL ? (
           // eslint-disable-next-line @next/next/no-img-element
