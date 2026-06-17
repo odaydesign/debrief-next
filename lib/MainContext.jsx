@@ -48,6 +48,9 @@ export function MainProvider({ children }) {
   const user = fbUser ? { id: fbUser.uid } : null;
   const [activeArticle, setActiveArticle] = useState(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  // Selected news-river category (null = "Senaste"/all). Set from the top nav,
+  // read by the feed. Lives here so nav and feed can sync across routes.
+  const [category, setCategory] = useState(null);
 
   // Shared queries
   const interactions = useQuery(api.articles.getUserInteractions, user ? { userId: user.id } : "skip");
@@ -138,6 +141,8 @@ export function MainProvider({ children }) {
     signOut,
     activeArticle,
     isOverlayOpen,
+    category,
+    setCategory,
     interactions,
     bundles,
     openArticle: handleOpenArticle,

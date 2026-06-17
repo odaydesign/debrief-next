@@ -17,7 +17,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-card/90 backdrop-blur-xl border border-line rounded-2xl shadow-2xl z-[60] flex justify-between items-center p-1.5 px-4 pointer-events-auto"
+      className="md:hidden fixed left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-card/90 backdrop-blur-xl border border-line rounded-2xl shadow-2xl z-[60] flex justify-between items-center p-1.5 px-4 pointer-events-auto"
       style={{ bottom: "max(20px, calc(env(safe-area-inset-bottom) + 12px))" }}
     >
       {navItems.map(({ icon: Icon, href, label }) => {

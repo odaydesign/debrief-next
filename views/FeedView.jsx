@@ -1,295 +1,164 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CardContent } from "@/components/FeedMasonryComponents";
-import { Masthead, EditorialList, DayMagazineLayout } from "@/components/DayMagazine";
-import { EditionProgress, EditionCompleteCard } from "@/components/EditionRitual";
-import usePullToRefresh from "@/lib/usePullToRefresh";
-import { useStreak } from "@/lib/streak";
-import { Layers } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Newspaper } from 'lucide-react';
+import { useMain } from '@/lib/MainContext';
+import {
+  LeadStory,
+  SecondaryCard,
+  RiverRow,
+  HeadlineRow,
+  SectionHeader,
+} from '@/components/NewsRiver';
 
-// ─── Date helpers ────────────────────────────────────────────────────────────
-const getDateString = (dateObj) => {
-  const d = new Date(dateObj);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
-
-const generateWeekStacks = (baseDate, articles) => {
-  const stacks = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() - i);
-    const targetDateStr = getDateString(d);
-    const dayArticles = articles.filter(a => getDateString(a.date) === targetDateStr);
-    stacks.push({ id: `stack-${d.toISOString()}`, date: d, articles: dayArticles });
-  }
-  return stacks;
-};
-
-// ─── Single stack node (past days, clickable) ────────────────────────────────
-const DailyStackNode = ({ stack, onOpen }) => {
-  const stackCards = stack.articles.slice(0, 3).reverse();
-
-  return (
-    <div className="flex flex-col items-center justify-center p-6 py-16 min-h-[80vh] relative snap-center">
-      <div className="absolute top-16 left-0 right-0 p-6 flex justify-center items-start pointer-events-none z-20">
-        <div className="text-center">
-          <h2 className="kicker mb-2">Tidigare nummer</h2>
-          <h1 className="text-4xl font-serif text-ink capitalize leading-none">
-            {stack.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}
-          </h1>
-        </div>
-      </div>
-
-      <motion.div
-        className="relative w-full max-w-[340px] md:max-w-[400px] aspect-[3/4] perspective-1000 cursor-pointer mt-28 mb-8"
-        onClick={() => onOpen(stack)}
-        whileHover="hovered"
-        initial="initial"
-        animate="animate"
-      >
-        {stackCards.map((article, idx) => {
-          const stackDepth = stackCards.length - idx - 1;
-          const scale = 1 - stackDepth * 0.05;
-          const yOffset = stackDepth * 25;
-          const rotate = stackDepth % 2 === 0 ? stackDepth * 2 : stackDepth * -2;
-          const zIndex = 50 - stackDepth;
-          const isFront = stackDepth === 0;
-
-          let hoverRotate = 0, hoverYOffset = yOffset - 20, hoverXOffset = 0;
-          if (stackDepth === 1) { hoverYOffset = yOffset - 40; hoverRotate = -8; hoverXOffset = -30; }
-          else if (stackDepth === 2) { hoverYOffset = yOffset - 50; hoverRotate = 8; hoverXOffset = 30; }
-
-          return (
-            <motion.div
-              key={article.id || `stack-${idx}`}
-              variants={{
-                initial: { scale: 0.8, y: yOffset, x: 0, rotateZ: rotate },
-                animate: { y: yOffset, x: 0, scale, rotateZ: rotate },
-                hovered: { y: hoverYOffset, x: hoverXOffset, scale: isFront ? 1.02 : scale + 0.02, rotateZ: hoverRotate }
-              }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className={`absolute top-0 left-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden ${isFront ? 'z-50' : 'pointer-events-none'}`}
-              style={{ zIndex, transformOrigin: 'bottom center' }}
-            >
-              <div className="w-full h-full pointer-events-none bg-card">
-                <CardContent data={article} />
-              </div>
-              {!isFront && (
-                <motion.div
-                  className="absolute inset-0 bg-black/30 backdrop-blur-[1px]"
-                  variants={{ initial: { opacity: 1 }, animate: { opacity: 1 }, hovered: { opacity: 0.1 } }}
-                  transition={{ duration: 0.3 }}
-                />
-              )}
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      <div className="text-center z-10 px-6 max-w-md mx-auto mt-6 pointer-events-none flex flex-col items-center gap-6">
-        <p className="text-dek font-sans text-sm leading-relaxed line-clamp-2">
-          {stack.articles.length} artiklar · {[...new Set(stack.articles.map(a => a.tag || a.category).filter(Boolean))].slice(0, 3).join(', ')}
-        </p>
-        <button
-          className="bg-card px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase text-ink border border-line shadow-sm font-sans mx-auto transition-all pointer-events-auto hover:bg-surface"
-          onClick={() => onOpen(stack)}
-        >
-          Öppna dagsnummer →
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// ─── Loading skeleton — mirrors the masthead + editorial list ────────────────
+// ─── Loading skeleton — mirrors the lead + river layout ──────────────────────
 const FeedSkeleton = () => (
-  <div className="min-h-screen bg-bg">
-    <div className="max-w-[640px] mx-auto px-4 pt-16 pb-9 animate-pulse">
-      <div className="h-4 w-16 bg-surface rounded mb-5" />
-      <div className="h-3 w-52 bg-surface rounded mb-6" />
-      <div className="space-y-3 mb-7">
-        <div className="h-9 w-full bg-surface rounded" />
-        <div className="h-9 w-4/5 bg-surface rounded" />
-      </div>
-      <div className="flex gap-5">
-        <div className="h-3 w-14 bg-surface rounded" />
-        <div className="h-3 w-12 bg-surface rounded" />
+  <div className="max-w-[1240px] mx-auto px-4 md:px-6 pt-6 md:pt-9 animate-pulse">
+    <div className="grid md:grid-cols-2 gap-6 md:gap-9 pb-8 border-b border-line">
+      <div className="w-full aspect-[16/10] md:aspect-[5/4] bg-surface rounded-xl" />
+      <div className="flex flex-col justify-center">
+        <div className="h-3 w-20 bg-surface rounded mb-4" />
+        <div className="h-8 w-full bg-surface rounded mb-2" />
+        <div className="h-8 w-4/5 bg-surface rounded mb-5" />
+        <div className="h-3 w-full bg-surface rounded mb-2" />
+        <div className="h-3 w-2/3 bg-surface rounded" />
       </div>
     </div>
-    <div className="max-w-[640px] mx-auto px-4 flex flex-col gap-4 pt-6 pb-32">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 py-8">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="animate-pulse bg-card border border-line rounded-2xl p-5" style={{ animationDelay: `${i * 140}ms` }}>
-          <div className="h-3 w-20 bg-surface rounded mb-4" />
-          <div className="h-6 w-full bg-surface rounded mb-2" />
-          <div className="h-6 w-3/4 bg-surface rounded mb-4" />
-          <div className="h-3 w-full bg-surface rounded mb-1.5" />
-          <div className="h-3 w-5/6 bg-surface rounded" />
+        <div key={i}>
+          <div className="w-full aspect-[16/10] bg-surface rounded-lg mb-3.5" />
+          <div className="h-5 w-full bg-surface rounded mb-2" />
+          <div className="h-5 w-3/5 bg-surface rounded" />
         </div>
       ))}
     </div>
   </div>
 );
 
-// ─── Main FeedView ────────────────────────────────────────────────────────────
-const PTR_LABELS = {
-  idle: 'Dra för att uppdatera',
-  pulling: 'Dra för att uppdatera',
-  ready: 'Släpp för att uppdatera',
-  refreshing: 'Uppdaterar…',
-};
+const EmptyState = ({ category, onClear }) => (
+  <div className="max-w-[1240px] mx-auto px-6 py-28 text-center">
+    <Newspaper className="mx-auto mb-5 text-faint" size={40} strokeWidth={1.5} />
+    <h1 className="font-serif text-3xl text-ink mb-3">
+      {category ? `Inget i ${category} än` : 'Inget publicerat än'}
+    </h1>
+    <p className="text-muted font-sans max-w-sm mx-auto leading-relaxed">
+      {category
+        ? 'Det finns inga artiklar i den här kategorin just nu.'
+        : 'Nya artiklar dyker upp här så fort de är publicerade.'}
+    </p>
+    {category && (
+      <button
+        onClick={onClear}
+        className="mt-7 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-ink text-sm font-semibold hover:opacity-90 transition-opacity"
+      >
+        Visa senaste
+      </button>
+    )}
+  </div>
+);
 
-const FeedView = ({ articles, currentDate, setActiveArticle, onLoadPreviousDay, loading }) => {
-  const [openStack, setOpenStack] = useState(null);
-  const [weekStacks, setWeekStacks] = useState([]);
-  const [refreshKey, setRefreshKey] = useState(0);
+// ─── News-river feed ─────────────────────────────────────────────────────────
+const FeedView = ({ articles, setActiveArticle, loading }) => {
+  const { category, setCategory } = useMain();
 
-  const scrollRef = React.useRef(0);
-  const containerRef = React.useRef(null);
-
-  const streak = useStreak();
-  const { state: ptrState, indicatorRef } = usePullToRefresh(
-    containerRef,
-    () => setRefreshKey((k) => k + 1),
-    { disabled: !!openStack || loading }
+  const sorted = useMemo(
+    () => [...(articles || [])].sort((a, b) => b.date - a.date),
+    [articles]
   );
 
-  useEffect(() => {
-    if (articles && articles.length > 0) {
-      setWeekStacks(generateWeekStacks(currentDate, articles));
-    } else {
-      setWeekStacks([]);
+  const filtered = useMemo(
+    () => (category ? sorted.filter((a) => (a.tag || a.category) === category) : sorted),
+    [sorted, category]
+  );
+
+  // Topics sidebar — every category with a count, most populous first.
+  const topics = useMemo(() => {
+    const m = new Map();
+    for (const a of sorted) {
+      const c = a.tag || a.category;
+      if (c) m.set(c, (m.get(c) || 0) + 1);
     }
-    setOpenStack(null);
-  }, [currentDate, articles]);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  }, [sorted]);
 
-  useEffect(() => {
-    if (!openStack && containerRef.current) {
-      setTimeout(() => {
-        if (containerRef.current) containerRef.current.scrollTop = scrollRef.current;
-      }, 50);
-    }
-  }, [openStack]);
+  if (loading) return <FeedSkeleton />;
+  if (filtered.length === 0) return <EmptyState category={category} onClear={() => setCategory(null)} />;
 
-  const handleScroll = (e) => { if (!openStack) scrollRef.current = e.target.scrollTop; };
-
-  if (loading) {
-    return <FeedSkeleton />;
-  }
-
-  // No articles at all — show a real empty state instead of an eternal spinner.
-  if (weekStacks.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-bg px-6 text-center">
-        <span className="font-serif text-base font-semibold tracking-tight mb-8">Debrief</span>
-        <h1 className="font-serif text-3xl text-ink mb-3">Inget publicerat än</h1>
-        <p className="text-muted font-sans max-w-sm leading-relaxed">
-          Dagens briefer dyker upp här så fort de är handplockade.
-        </p>
-      </div>
-    );
-  }
+  const [lead, ...rest] = filtered;
+  const secondary = rest.slice(0, 3);
+  const river = rest.slice(3);
+  const latest = sorted.slice(0, 6);
 
   return (
-    <div className="w-full relative min-h-screen overflow-hidden">
-      <AnimatePresence mode="wait">
+    <div className="max-w-[1240px] mx-auto px-4 md:px-6 pt-5 md:pt-8 animate-in fade-in duration-500">
+      {category && <SectionHeader title={category} className="mb-5" />}
 
-        {!openStack ? (
-          /* ── Timeline view ──────────────────────────────────────────────── */
-          <motion.div
-            key="stack-timeline-view"
-            ref={containerRef}
-            onScroll={handleScroll}
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 z-20 bg-bg overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar overscroll-y-contain"
-          >
-            {/* Pull-to-refresh indicator (driven by the hook) */}
-            <div
-              ref={indicatorRef}
-              className="absolute top-0 left-0 right-0 flex justify-center pointer-events-none z-30"
-              style={{ opacity: 0, transform: 'translateY(0px)' }}
-            >
-              <div className="-mt-12 flex items-center gap-2 bg-card border border-line rounded-full px-4 py-2 shadow-lg">
-                <span className={`w-1.5 h-1.5 rounded-full bg-accent ${ptrState === 'refreshing' ? 'animate-pulse' : ''}`} />
-                <span className="kicker" style={{ color: 'var(--ink)' }}>{PTR_LABELS[ptrState]}</span>
-              </div>
-            </div>
+      {/* Lead */}
+      <div className="pb-8 border-b border-line">
+        <LeadStory article={lead} onOpen={setActiveArticle} />
+      </div>
 
-            <div className="pb-32">
+      {/* Secondary 3-up */}
+      {secondary.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 py-8 border-b border-line">
+          {secondary.map((a) => (
+            <SecondaryCard key={a.id} article={a} onOpen={setActiveArticle} />
+          ))}
+        </div>
+      )}
 
-              {/* Today — editorial list ─────────────────────────────────── */}
-              {weekStacks.length > 0 && (() => {
-                const today = weekStacks[0].articles;
-                const readCount = today.filter((a) => a.isRead).length;
-                const complete = today.length > 0 && readCount === today.length;
-                return (
-                  <div key={refreshKey} className="border-b border-line pb-12">
-                    <Masthead
-                      date={weekStacks[0].date}
-                      articles={today}
-                      progress={today.length > 0 ? <EditionProgress read={readCount} total={today.length} /> : null}
-                      streak={streak.days}
-                    />
-                    {today.length === 0 ? (
-                      <div className="px-5 py-16 text-center text-muted">
-                        Inga artiklar publicerade idag.
-                      </div>
-                    ) : (
-                      <EditorialList articles={today} onArticleClick={setActiveArticle} />
-                    )}
-                    {complete && <EditionCompleteCard streak={streak.days} />}
-                  </div>
-                );
-              })()}
-
-              {/* Past days — clickable card stacks ─────────────────────── */}
-              {weekStacks.slice(1).map((stack) => (
-                <DailyStackNode key={stack.id} stack={stack} onOpen={setOpenStack} />
+      {/* River + sidebar */}
+      <div className="grid lg:grid-cols-[1fr_300px] gap-8 lg:gap-14 pt-8 pb-16">
+        <div className="min-w-0">
+          <SectionHeader title={category ? `Mer i ${category}` : 'Senaste nytt'} />
+          {river.length > 0 ? (
+            <div className="flex flex-col">
+              {river.map((a) => (
+                <RiverRow key={a.id} article={a} onOpen={setActiveArticle} />
               ))}
+            </div>
+          ) : (
+            <p className="text-muted text-sm py-6">Inga fler artiklar här just nu.</p>
+          )}
+        </div>
 
-              {/* Load more ────────────────────────────────────────────── */}
-              <div className="min-h-[40vh] flex flex-col items-center justify-center p-8 mt-12">
-                <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-6">
-                  <Layers className="text-muted" size={32} />
-                </div>
-                <h2 className="font-serif text-3xl text-ink mb-2">Slutet av veckan</h2>
-                <p className="text-muted font-sans text-center max-w-sm mb-8">
-                  Du har nått slutet av de senaste 7 dagarnas händelser.
-                </p>
-                <button
-                  className="bg-card px-6 py-3 rounded-full text-sm font-bold text-ink border border-line font-sans hover:bg-surface transition-colors"
-                  onClick={onLoadPreviousDay}
-                >
-                  Ladda föregående vecka
-                </button>
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-[72px] flex flex-col gap-9">
+            <div>
+              <SectionHeader title="Rubriker" />
+              <div className="flex flex-col">
+                {latest.map((a, i) => (
+                  <HeadlineRow key={a.id} article={a} onOpen={setActiveArticle} index={i} />
+                ))}
               </div>
             </div>
-          </motion.div>
 
-        ) : (
-          /* ── Opened day — full editorial spread ────────────────────────── */
-          <motion.div
-            key="grid-view"
-            initial={{ opacity: 0, y: 80, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.98 }}
-            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 z-30 overflow-y-auto"
-          >
-            <DayMagazineLayout
-              articles={openStack.articles}
-              onArticleClick={setActiveArticle}
-              date={openStack.date}
-              onClose={() => setOpenStack(null)}
-            />
-          </motion.div>
-        )}
-
-      </AnimatePresence>
+            {topics.length > 0 && (
+              <div>
+                <SectionHeader title="Ämnen" />
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {topics.map(([c, n]) => (
+                    <button
+                      key={c}
+                      onClick={() => setCategory(c)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
+                        category === c
+                          ? 'bg-accent border-accent text-accent-ink'
+                          : 'bg-card border-line text-dek hover:border-line-strong hover:text-ink'
+                      }`}
+                    >
+                      {c}
+                      <span className={category === c ? 'text-accent-ink/70' : 'text-faint'}>{n}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 };
