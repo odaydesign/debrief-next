@@ -90,20 +90,17 @@ export const SecondaryCard = ({ article, onOpen }) => (
   </article>
 );
 
-// ── River row — the classic "Latest" item: text left, thumbnail right ──
+// ── River row — image-forward "Latest" item: title + meta left, large image right ──
 export const RiverRow = ({ article, onOpen }) => (
-  <article {...openProps(onOpen, article)} className="group cursor-pointer flex gap-4 md:gap-6 py-5 border-b border-line">
+  <article {...openProps(onOpen, article)} className="group cursor-pointer flex gap-5 md:gap-7 py-6 border-b border-line items-center">
     <div className="flex-1 min-w-0">
       <Kicker article={article} />
-      <h3 className="font-serif text-[1.2rem] md:text-[1.35rem] leading-[1.13] tracking-tight text-balance mt-1.5 mb-1.5 group-hover:text-accent transition-colors">
+      <h3 className="font-serif text-[1.35rem] md:text-[1.65rem] leading-[1.1] tracking-tight text-balance mt-1.5 mb-2.5 group-hover:text-accent transition-colors">
         {article.title}
       </h3>
-      {dekOf(article) && (
-        <p className="hidden md:block text-sm text-dek leading-relaxed line-clamp-2 mb-2">{dekOf(article)}</p>
-      )}
       <Byline article={article} />
     </div>
-    {article.image && <Img article={article} className="shrink-0 w-[108px] h-[80px] md:w-[160px] md:h-[106px] rounded-lg" />}
+    {article.image && <Img article={article} className="shrink-0 w-[140px] h-[104px] md:w-[288px] md:h-[188px] rounded-lg" />}
   </article>
 );
 
