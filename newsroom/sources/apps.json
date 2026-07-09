@@ -1,0 +1,12 @@
+{
+  "agent": "apps",
+  "feeds": [
+    { "name": "TechCrunch Apps", "url": "https://techcrunch.com/category/apps/feed/" },
+    { "name": "9to5Mac", "url": "https://9to5mac.com/feed/" },
+    { "name": "Android Police", "url": "https://www.androidpolice.com/feed/" },
+    { "name": "The Verge", "url": "https://www.theverge.com/rss/index.xml" }
+  ],
+  "sites": [],
+  "newsletters": [],
+  "x": []
+}

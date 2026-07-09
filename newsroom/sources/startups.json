@@ -1,0 +1,15 @@
+{
+  "agent": "startups",
+  "feeds": [
+    { "name": "TechCrunch Startups", "url": "https://techcrunch.com/category/startups/feed/" },
+    { "name": "Sifted", "url": "https://sifted.eu/feed" },
+    { "name": "EU-Startups", "url": "https://www.eu-startups.com/feed/" },
+    { "name": "Breakit", "url": "https://www.breakit.se/feed/artiklar" },
+    { "name": "Y Combinator Blog", "url": "https://www.ycombinator.com/blog/rss" }
+  ],
+  "sites": [
+    { "name": "Dealroom", "url": "https://dealroom.co/blog" }
+  ],
+  "newsletters": [],
+  "x": []
+}

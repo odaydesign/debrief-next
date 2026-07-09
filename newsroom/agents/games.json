@@ -1,0 +1,19 @@
+{
+  "id": "games",
+  "name": "Spelagenten",
+  "mission": "Bevakar spelbranschen: stora spelsläpp, spelstudior (särskilt nordiska), plattformar och konsoler, spelteknik och branschaffärer.",
+  "tag": "SPEL",
+  "tagStyle": "bg-purple-500 text-white",
+  "buttonText": "LÄS ARTIKELN",
+  "palette": [
+    { "bgColor": "bg-[#2d1b4e]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 2,
+    "maxAgeDays": 3,
+    "criteria": "Prioritera: stora släpp och tillkännagivanden, nordiska studior och svenska bolag (Embracer, Paradox, Mojang m.fl.), plattformsnyheter, branschaffärer. Undvik: patchnotiser, rykten utan källa, recensioner av småtitlar."
+  },
+  "model": null
+}

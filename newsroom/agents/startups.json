@@ -1,0 +1,19 @@
+{
+  "id": "startups",
+  "name": "Startupagenten",
+  "mission": "Bevakar startupvärlden med nordiskt fokus: finansieringsrundor, nya bolag, exits, investerartrender och det svenska/europeiska ekosystemet.",
+  "tag": "STARTUPS",
+  "tagStyle": "bg-orange-500 text-white",
+  "buttonText": "LÄS ARTIKELN",
+  "palette": [
+    { "bgColor": "bg-[#7c2d12]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 3,
+    "maxAgeDays": 3,
+    "criteria": "Prioritera: svenska och nordiska rundor och exits, europeiska megarundor, nya fonder, trender med data (t.ex. från Sifted/Dealroom). Undvik: pressreleaser utan siffror, amerikanska serie A-rundor utan relevans för Norden."
+  },
+  "model": null
+}

@@ -1,0 +1,19 @@
+{
+  "id": "saas",
+  "name": "SaaS-agenten",
+  "mission": "Bevakar SaaS och B2B-mjukvara: produktlanseringar, prissättning och affärsmodeller, tillväxtstrategier och verktygen team faktiskt jobbar i.",
+  "tag": "SAAS",
+  "tagStyle": "bg-cyan-600 text-white",
+  "buttonText": "LÄS ANALYSEN",
+  "palette": [
+    { "bgColor": "bg-[#164e63]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 2,
+    "maxAgeDays": 5,
+    "criteria": "Prioritera: lanseringar med tydlig differentiering, insikter om prissättning/tillväxt med riktiga siffror, konsolidering i branschen, nordiska SaaS-bolag. Undvik: content marketing utan data, generiska 'growth hacks'."
+  },
+  "model": null
+}

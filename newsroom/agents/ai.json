@@ -1,0 +1,19 @@
+{
+  "id": "ai",
+  "name": "AI-agenten",
+  "mission": "Bevakar artificiell intelligens: nya modeller och verktyg, forskning med praktisk betydelse, AI i produkter, samt policy och reglering i EU och Sverige.",
+  "tag": "AI",
+  "tagStyle": "bg-blue-500 text-white",
+  "buttonText": "LÄS ARTIKELN",
+  "palette": [
+    { "bgColor": "bg-[#1e3a5f]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 3,
+    "maxAgeDays": 3,
+    "criteria": "Prioritera: modellsläpp och genombrott, stora produktnyheter från ledande AI-bolag, forskning som påverkar hur folk bygger eller använder AI, AI-reglering i EU/Sverige. Undvik: rena rykten, inkrementella versionsuppdateringar, sponsrat innehåll, hajpade heta åsikter utan substans."
+  },
+  "model": null
+}

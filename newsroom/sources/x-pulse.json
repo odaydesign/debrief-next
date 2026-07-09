@@ -1,0 +1,18 @@
+{
+  "agent": "x-pulse",
+  "feeds": [],
+  "sites": [],
+  "newsletters": [],
+  "x": [
+    "sama",
+    "AnthropicAI",
+    "OpenAI",
+    "karpathy",
+    "simonw",
+    "levelsio",
+    "paulg",
+    "gdb",
+    "emollick"
+  ],
+  "_note": "X saknar öppna RSS-flöden. Denna agent kräver en adapter (X API v2 eller tredjepartstjänst) — se newsroom/README.md, avsnittet 'X-adaptern'. Handles ovan är startindexet för vilka konton som bevakas."
+}

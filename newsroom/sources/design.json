@@ -1,0 +1,18 @@
+{
+  "agent": "design",
+  "feeds": [
+    { "name": "Smashing Magazine", "url": "https://www.smashingmagazine.com/feed/" },
+    { "name": "CSS-Tricks", "url": "https://css-tricks.com/feed/" },
+    { "name": "Nielsen Norman Group", "url": "https://www.nngroup.com/feed/rss/" },
+    { "name": "UX Collective", "url": "https://uxdesign.cc/feed" },
+    { "name": "Dezeen", "url": "https://www.dezeen.com/feed/" }
+  ],
+  "sites": [
+    { "name": "Figma Blog", "url": "https://www.figma.com/blog/" },
+    { "name": "Linear Blog", "url": "https://linear.app/blog" }
+  ],
+  "newsletters": [
+    { "name": "Dense Discovery", "url": "https://www.densediscovery.com/feed.xml" }
+  ],
+  "x": []
+}

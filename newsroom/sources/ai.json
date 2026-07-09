@@ -1,0 +1,20 @@
+{
+  "agent": "ai",
+  "feeds": [
+    { "name": "TechCrunch AI", "url": "https://techcrunch.com/category/artificial-intelligence/feed/" },
+    { "name": "The Verge — AI", "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml" },
+    { "name": "VentureBeat AI", "url": "https://venturebeat.com/category/ai/feed/" },
+    { "name": "MIT Technology Review", "url": "https://www.technologyreview.com/feed/" },
+    { "name": "Hugging Face Blog", "url": "https://huggingface.co/blog/feed.xml" },
+    { "name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/" }
+  ],
+  "sites": [
+    { "name": "Anthropic News", "url": "https://www.anthropic.com/news" },
+    { "name": "OpenAI News", "url": "https://openai.com/news/" }
+  ],
+  "newsletters": [
+    { "name": "Import AI", "url": "https://importai.substack.com/feed" },
+    { "name": "Ben's Bites", "url": "https://bensbites.beehiiv.com/feed" }
+  ],
+  "x": []
+}

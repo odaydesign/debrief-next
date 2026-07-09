@@ -1,0 +1,20 @@
+{
+  "id": "x-pulse",
+  "name": "X-agenten",
+  "mission": "Bevakar samtalet på X (Twitter): vad tongivande röster inom tech, AI och design diskuterar just nu. Kuraterar trådar och inlägg med substans och sätter dem i sammanhang.",
+  "tag": "X-PULS",
+  "tagStyle": "bg-neutral-900 text-white",
+  "buttonText": "LÄS TRÅDEN",
+  "palette": [
+    { "bgColor": "bg-[#0f0f0f]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning", "x-kuratering"],
+  "selection": {
+    "maxPerRun": 2,
+    "maxAgeDays": 2,
+    "criteria": "Prioritera: trådar med genuin insikt eller nyhetsvärde, debatter där flera tunga röster deltar, förstahandsinformation från grundare/forskare. Undvik: engagemangsbete, memes utan sammanhang, rena bråk."
+  },
+  "experimental": true,
+  "model": null
+}

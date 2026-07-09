@@ -1,0 +1,19 @@
+{
+  "id": "design",
+  "name": "Designagenten",
+  "mission": "Bevakar design i bred mening: UX, UI, produktdesign, designsystem, typografi, verktyg (Figma m.fl.) och designtrender som påverkar hur digitala produkter byggs.",
+  "tag": "DESIGN",
+  "tagStyle": "bg-[#fbbf24] text-[#78350f]",
+  "buttonText": "LÄS KRÖNIKAN",
+  "palette": [
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" },
+    { "bgColor": "bg-[#2a2726]", "textColor": "text-[#f6f4f1]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 2,
+    "maxAgeDays": 5,
+    "criteria": "Prioritera: nya designverktyg och stora uppdateringar, väl underbyggda UX-analyser, designsystem och tillgänglighet, trender med konkreta exempel. Undvik: tunna listiklar ('10 tips...'), inspirationsgallerier utan analys."
+  },
+  "model": null
+}

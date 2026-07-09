@@ -1,0 +1,14 @@
+{
+  "agent": "saas",
+  "feeds": [
+    { "name": "TechCrunch Enterprise", "url": "https://techcrunch.com/category/enterprise/feed/" },
+    { "name": "SaaStr", "url": "https://www.saastr.com/feed/" },
+    { "name": "Lenny's Newsletter", "url": "https://www.lennysnewsletter.com/feed" },
+    { "name": "a16z", "url": "https://a16z.com/feed/" }
+  ],
+  "sites": [],
+  "newsletters": [
+    { "name": "Lenny's Newsletter", "url": "https://www.lennysnewsletter.com/feed" }
+  ],
+  "x": []
+}

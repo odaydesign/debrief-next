@@ -6,7 +6,8 @@ import { Plus, Edit2, Trash2, Search, Calendar, Tag, AlertCircle } from 'lucide-
 import CustomModal from "@/components/CustomModal";
 
 const AdminDashboardView = ({ onNewPost, onEditPost }) => {
-    const articles = useQuery(api.articles.getAll);
+    // Admin sees everything, including newsroom-agent drafts awaiting review.
+    const articles = useQuery(api.articles.getAllAdmin);
     const deleteArticle = useMutation(api.articles.remove);
     const [searchTerm, setSearchTerm] = useState('');
     const [isDeletingId, setIsDeletingId] = useState(null);
@@ -113,7 +114,14 @@ const AdminDashboardView = ({ onNewPost, onEditPost }) => {
                                     filteredArticles.map(article => (
                                         <tr key={article._id} className="hover:bg-white/5 transition-colors group">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-white text-base mb-1 truncate max-w-[200px] md:max-w-md">{article.title || 'Utan titel'}</div>
+                                                <div className="font-bold text-white text-base mb-1 truncate max-w-[200px] md:max-w-md">
+                                                    {article.status === 'draft' && (
+                                                        <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mr-2 align-middle">
+                                                            Utkast{article.agent ? ` · ${article.agent}` : ''}
+                                                        </span>
+                                                    )}
+                                                    {article.title || 'Utan titel'}
+                                                </div>
                                                 <div className="text-xs text-white/40 flex items-center gap-1.5 uppercase tracking-wide">
                                                     <div className={`w-2 h-2 rounded-full ${article.bgColor ? article.bgColor.split(' ')[0].replace('bg-', 'bg-') : 'bg-white'}`}></div>
                                                     {article.type || 'Standard'}

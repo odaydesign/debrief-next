@@ -1,0 +1,19 @@
+{
+  "id": "apps",
+  "name": "Appagenten",
+  "mission": "Bevakar appar och konsumentmjukvara: nya appar värda att känna till, stora uppdateringar av populära appar, iOS/Android-plattformsnyheter och app-ekonomin.",
+  "tag": "APPAR",
+  "tagStyle": "bg-emerald-500 text-white",
+  "buttonText": "LÄS ARTIKELN",
+  "palette": [
+    { "bgColor": "bg-[#1b4332]", "textColor": "text-white" },
+    { "bgColor": "bg-[#f6f4f1]", "textColor": "text-[#2a2726]" }
+  ],
+  "skills": ["svensk-nyhetsartikel", "omskrivning", "berikning"],
+  "selection": {
+    "maxPerRun": 2,
+    "maxAgeDays": 3,
+    "criteria": "Prioritera: appar med tydligt nytt värde, stora förändringar i App Store/Google Play-reglerna, plattformssläpp (iOS/Android), appar som växer snabbt i Norden. Undvik: småuppdateringar, ren marknadsföring."
+  },
+  "model": null
+}

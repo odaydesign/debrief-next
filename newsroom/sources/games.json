@@ -1,0 +1,15 @@
+{
+  "agent": "games",
+  "feeds": [
+    { "name": "Polygon", "url": "https://www.polygon.com/rss/index.xml" },
+    { "name": "Eurogamer", "url": "https://www.eurogamer.net/feed" },
+    { "name": "GamesIndustry.biz", "url": "https://www.gamesindustry.biz/feed" },
+    { "name": "Rock Paper Shotgun", "url": "https://www.rockpapershotgun.com/feed" }
+  ],
+  "sites": [
+    { "name": "Paradox Interactive News", "url": "https://www.paradoxinteractive.com/media/news" },
+    { "name": "Embracer Group Press", "url": "https://embracer.com/releases/" }
+  ],
+  "newsletters": [],
+  "x": []
+}
